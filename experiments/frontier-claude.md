@@ -4,6 +4,8 @@
 
 Not a fine-tune. This is the **required frontier closed-model baseline**, scored with `eval/run.py` through Anthropic's native Messages API.
 
+**Team decision:** Claude Opus 5.5 (high) is our **only** frontier baseline. Every headline comparison is against it. No other closed models are run.
+
 ## Setup
 | Field | Value |
 |---|---|
