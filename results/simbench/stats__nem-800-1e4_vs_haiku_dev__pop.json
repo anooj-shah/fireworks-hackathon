@@ -1,0 +1,34 @@
+[
+  {
+    "base": "claude-haiku-5-5:dev",
+    "new": "ft-nem:nem-800-1e4",
+    "subset": "pop",
+    "base_score": 0.29757810147780983,
+    "new_score": 0.35193434273677815,
+    "mcnemar_top1": {
+      "only_new": 152,
+      "only_base": 78,
+      "units": 754,
+      "p": 1.2122453400939537e-06
+    },
+    "closer": {
+      "new_closer": 289,
+      "base_closer": 247,
+      "ties": 2,
+      "n_groups": 538,
+      "win_rate": 0.539179104477612,
+      "p": 0.0764744133814358
+    },
+    "bootstrap": {
+      "gap": 0.05435624125896832,
+      "ci_low": 0.004777940053305294,
+      "ci_high": 0.10316763664998581,
+      "ahead": 4924,
+      "B": 5000,
+      "n_groups": 538,
+      "n_items": 754
+    },
+    "unpaired_ids": 0,
+    "significant": false
+  }
+]
