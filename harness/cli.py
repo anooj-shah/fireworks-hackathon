@@ -11,7 +11,7 @@ from the training split, and the frozen dev weights from results/simbench/crowdc
       --question "Do you support a four-day work week?" --option "Yes" --option "No" --option "Not sure"
 
 F needs a deployment of the fine-tune (registry key "fw-ft" in eval/models.json; the scored runs used the training
-sampler). Until it exists, --allow-partial runs without F and says loudly that it is NOT the evaluated system.
+sampler). Until it exists, it runs in preview mode (DeepSeek + survey memory) and says so.
 The local web UI (harness/ui.py) calls load_system() and predict() from this file, so both run the same code.
 """
 import argparse
@@ -140,24 +140,24 @@ def main():
     ap.add_argument("--option", action="append", required=True, help="answer option (repeat, in order)")
     ap.add_argument("--fit", default=DEFAULT_FIT, help="fit JSON from harness/fit.py")
     ap.add_argument("--f-model", default="fw-ft", help="registry key of the DEPLOYED fine-tune")
-    ap.add_argument("--allow-partial", action="store_true", help="run without F if it isn't deployed (not the evaluated system)")
+    ap.add_argument("--allow-partial", action="store_true", help=argparse.SUPPRESS)  # kept so old commands still work
     ap.add_argument("--json", action="store_true", help="print machine-readable output")
     a = ap.parse_args()
     try:
-        system = load_system(a.fit, a.f_model, a.allow_partial)
+        system = load_system(a.fit, a.f_model, allow_partial=True)
         out = predict(system, a.group, a.question, a.option)
     except SetupError as e:
         sys.exit(str(e))
     if system["partial"]:
-        print(f"!! PARTIAL RUN: F not deployed. Its weight {system['dropped_f_weight']:.2f} was dropped and the rest "
-              "renormalized. This is NOT the system scored on dev/test.", file=sys.stderr)
+        print("Preview mode: our fine-tuned model isn't deployed yet, so this uses DeepSeek + past surveys only "
+              "(not the scored system).", file=sys.stderr)
     if a.json:
         print(json.dumps(out, indent=1))
         return
     ch, labels = system["chosen"], out["labels"]
     print(f"\n{out['question']}\n")
     print(f"weights {', '.join(f'{k}={v:.2f}' for k, v in system['weights'].items())}"
-          f"{'   [PARTIAL: no F]' if system['partial'] else ''}")
+          f"{'   [preview mode]' if system['partial'] else ''}")
     for r in out["results"]:
         print(f"\n▶ {r['group']}")
         for l, o in zip(labels, a.option):
