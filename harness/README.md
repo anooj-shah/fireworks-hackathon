@@ -71,6 +71,16 @@ SimBench score (100 = matches real people, 0 = no better than an even split). Op
 ```
 **Measured live reproducibility** (`results/simbench/reproduce__crowdcast__dev-v1__live.json`): DeepSeek on Fireworks isn't deterministic at temperature 0. A fresh dev run gave identical answers on only 37% of items, and its own score moved 29.6 → 25.8. The harness score moved much less: 41.12 → 40.72 (−0.40). The fine-tune (F) can only be re-sampled from the account that trained it (`train/sample_eval.py --from-checkpoint`).
 
+## Local web UI
+```bash
+../.venv/bin/python harness/ui.py          # open http://127.0.0.1:8050 (standard library only, nothing to install)
+```
+- **Held-out questions (scored):**
+  - Replays the committed SimBench **test** runs, with no API calls.
+  - Shows real people vs Crowdcast vs Claude Opus 5.5 vs the fine-tune alone vs untrained Qwen: stacked bars, each system's score on that row, and "100 people" dot grids.
+  - Buttons: the rule-drawn demo question (`results/simbench/demo_draw.json`), random questions, and search.
+- **Ask a new question (live):** same code as the CLI (`cli.predict`). Until the fine-tune is deployed, it runs in a labeled partial mode (DeepSeek + memory only).
+
 ## Run it locally
 ```bash
 ../.venv/bin/python harness/cli.py \

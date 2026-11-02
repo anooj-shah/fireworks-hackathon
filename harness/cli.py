@@ -12,6 +12,7 @@ from the training split, and the frozen dev weights from results/simbench/crowdc
 
 F needs a deployment of the fine-tune (registry key "fw-ft" in eval/models.json; the scored runs used the training
 sampler). Until it exists, --allow-partial runs without F and says loudly that it is NOT the evaluated system.
+The local web UI (harness/ui.py) calls load_system() and predict() from this file, so both run the same code.
 """
 import argparse
 import json
@@ -27,6 +28,12 @@ sys.path.insert(0, str(ROOT / "eval"))
 sys.path.insert(0, str(ROOT / "harness"))
 from tasks import simbench as T  # noqa: E402
 import crowdcast as C  # noqa: E402
+
+DEFAULT_FIT = "results/simbench/crowdcast_fit__v1.json"
+
+
+class SetupError(Exception):
+    pass
 
 
 def registry():
@@ -48,57 +55,46 @@ def call(cfg, messages):
     return {"text": r.choices[0].message.content or "", "latency": lat, "cost": cost}
 
 
-def bar(p, width=30):
-    n = int(round(p * width))
-    return "█" * n + "·" * (width - n)
-
-
-def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--group", action="append", required=True, help="group description (repeat for several)")
-    ap.add_argument("--question", required=True)
-    ap.add_argument("--option", action="append", required=True, help="answer option (repeat, in order)")
-    ap.add_argument("--fit", default="results/simbench/crowdcast_fit__v1.json", help="fit JSON from harness/fit.py")
-    ap.add_argument("--f-model", default="fw-ft", help="registry key of the DEPLOYED fine-tune")
-    ap.add_argument("--allow-partial", action="store_true", help="run without F if it isn't deployed (not the evaluated system)")
-    ap.add_argument("--json", action="store_true", help="print machine-readable output")
-    a = ap.parse_args()
-
+def load_system(fit_path=DEFAULT_FIT, f_model="fw-ft", allow_partial=False):
+    """Frozen weights + member endpoints + survey memory. Raises SetupError with a readable message."""
     from dotenv import load_dotenv
     load_dotenv(ROOT / ".env")
-    if len(a.option) < 2 or len(a.option) > 26:
-        sys.exit("need 2-26 options")
-    fit = json.loads((ROOT / a.fit).read_text())
+    fit = json.loads((ROOT / fit_path).read_text())
     ch = fit["chosen"]
     weights = dict(ch["weights"])
     reg = registry()
     o_cfg = reg[ch["o_model_key"]]
     if not os.environ.get(o_cfg["api_key_env"]):
-        sys.exit(f"{o_cfg['api_key_env']} is not set: put it in {ROOT / '.env'} (see .env.example)")
-    f_cfg = reg.get(a.f_model)
+        raise SetupError(f"{o_cfg['api_key_env']} is not set: put it in {ROOT / '.env'} (see .env.example)")
+    f_cfg = reg.get(f_model)
     f_ok = bool(f_cfg) and "FILL" not in f_cfg.get("model", "FILL")
-    partial = False
+    partial, dropped = False, 0.0
     if not f_ok:
-        if not a.allow_partial:
-            sys.exit(f"F (registry key '{a.f_model}') has no deployed model yet. Deploy the fine-tune and set its model id, "
-                     "or pass --allow-partial to run without F (NOT the evaluated system).")
+        if not allow_partial:
+            raise SetupError(f"F (registry key '{f_model}') has no deployed model yet. Deploy the fine-tune and set its "
+                             "model id, or allow partial mode (runs without F: NOT the evaluated system).")
         partial = True
-        wf = weights.pop("F", 0.0)
+        dropped = weights.pop("F", 0.0)
         rest = sum(weights.values())
         weights = {k: v / rest for k, v in weights.items()} if rest > 0 else {"U": 1.0}
-        print(f"!! PARTIAL RUN: F not deployed. Its weight {wf:.2f} was dropped and the rest renormalized. "
-              "This is NOT the system scored on dev/test.", file=sys.stderr)
+    return {"fit_path": fit_path, "chosen": ch, "weights": weights, "o_cfg": o_cfg, "f_cfg": f_cfg if f_ok else None,
+            "partial": partial, "dropped_f_weight": dropped, "memory": C.Memory.from_train()}
 
-    labels = list(string.ascii_uppercase[: len(a.option)])
-    question = a.question.strip() + "\n\nOptions:\n" + "\n".join(f"({l}): {o}" for l, o in zip(labels, a.option))
-    memory = C.Memory.from_train()
+
+def predict(system, groups, question_text, options):
+    """Run the harness for each group on one question. Returns a JSON-serializable dict."""
+    if not (2 <= len(options) <= 26):
+        raise SetupError("need 2-26 options")
+    labels = list(string.ascii_uppercase[: len(options)])
+    question = question_text.strip() + "\n\nOptions:\n" + "\n".join(f"({l}): {o}" for l, o in zip(labels, options))
+    ch, weights, memory = system["chosen"], system["weights"], system["memory"]
 
     def run_group(persona):
         item = {"persona": persona, "question": question, "labels": labels}
         msgs = T.build_messages(item)
-        jobs = {"O": o_cfg}
-        if f_ok:
-            jobs["F"] = f_cfg
+        jobs = {"O": system["o_cfg"]}
+        if system["f_cfg"]:
+            jobs["F"] = system["f_cfg"]
         t0 = time.perf_counter()
         with ThreadPoolExecutor(len(jobs)) as ex:
             futs = {k: ex.submit(call, cfg, msgs) for k, cfg in jobs.items()}
@@ -113,27 +109,56 @@ def main():
         dists["M"] = memory.predict(persona, question, labels)
         q = C.combine(dists, weights, labels)
         dis = C.disagreement(dists, labels)
-        flag = None if dis is None else dis > ch["trust_threshold"]
         costs = [v["cost"] for v in outs.values() if v.get("cost") is not None]
         return {"group": persona, "prediction": {l: q[l] for l in labels},
                 "members": {k: (None if d is None else {l: round(d[l], 4) for l in labels}) for k, d in dists.items()},
                 "member_errors": {k: v["error"] for k, v in outs.items() if v.get("error")},
-                "disagreement": dis, "ask_real_people": flag, "latency_s": wall,
-                "cost_usd": sum(costs) if costs else None,
-                "evidence": [{"similarity": round(s, 3), "persona": it["persona"], "question": it["question"].split("\n")[0][:120],
+                "disagreement": dis, "ask_real_people": None if dis is None else dis > ch["trust_threshold"],
+                "latency_s": wall, "cost_usd": sum(costs) if costs else None,
+                "evidence": [{"similarity": round(s, 3), "persona": it["persona"],
+                              "question": it["question"].split("\n")[0][:160],
                               "real": {l: round(it["human"][l], 3) for l in labels}}
                              for s, it in memory.neighbors(persona, question, labels, k=3)]}
 
-    results = [run_group(g) for g in a.group]
-    meta = {"weights_used": weights, "partial_run": partial, "O": o_cfg["model"], "F": f_cfg["model"] if f_ok else None,
-            "fit": a.fit, "trust_threshold": ch["trust_threshold"]}
+    with ThreadPoolExecutor(min(8, max(1, len(groups)))) as ex:
+        results = list(ex.map(run_group, groups))
+    meta = {"weights_used": weights, "partial_run": system["partial"], "O": system["o_cfg"]["model"],
+            "F": system["f_cfg"]["model"] if system["f_cfg"] else None, "fit": system["fit_path"],
+            "trust_threshold": ch["trust_threshold"]}
+    return {"meta": meta, "question": question, "labels": labels, "options": options, "results": results}
+
+
+def bar(p, width=30):
+    n = int(round(p * width))
+    return "█" * n + "·" * (width - n)
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--group", action="append", required=True, help="group description (repeat for several)")
+    ap.add_argument("--question", required=True)
+    ap.add_argument("--option", action="append", required=True, help="answer option (repeat, in order)")
+    ap.add_argument("--fit", default=DEFAULT_FIT, help="fit JSON from harness/fit.py")
+    ap.add_argument("--f-model", default="fw-ft", help="registry key of the DEPLOYED fine-tune")
+    ap.add_argument("--allow-partial", action="store_true", help="run without F if it isn't deployed (not the evaluated system)")
+    ap.add_argument("--json", action="store_true", help="print machine-readable output")
+    a = ap.parse_args()
+    try:
+        system = load_system(a.fit, a.f_model, a.allow_partial)
+        out = predict(system, a.group, a.question, a.option)
+    except SetupError as e:
+        sys.exit(str(e))
+    if system["partial"]:
+        print(f"!! PARTIAL RUN: F not deployed. Its weight {system['dropped_f_weight']:.2f} was dropped and the rest "
+              "renormalized. This is NOT the system scored on dev/test.", file=sys.stderr)
     if a.json:
-        print(json.dumps({"meta": meta, "question": question, "results": results}, indent=1))
+        print(json.dumps(out, indent=1))
         return
-    print(f"\n{question}\n")
-    print(f"weights {', '.join(f'{k}={v:.2f}' for k, v in weights.items())}"
-          f"{'   [PARTIAL: no F]' if partial else ''}")
-    for r in results:
+    ch, labels = system["chosen"], out["labels"]
+    print(f"\n{out['question']}\n")
+    print(f"weights {', '.join(f'{k}={v:.2f}' for k, v in system['weights'].items())}"
+          f"{'   [PARTIAL: no F]' if system['partial'] else ''}")
+    for r in out["results"]:
         print(f"\n▶ {r['group']}")
         for l, o in zip(labels, a.option):
             p = r["prediction"][l]
