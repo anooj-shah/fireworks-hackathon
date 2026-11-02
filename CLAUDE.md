@@ -74,7 +74,6 @@ The team lead's four principles take priority when making tradeoffs. The rubric 
 | `docs/rules-and-submission.md` | Official rules, form fields, checklist, README + video templates, disclosure log |
 | `docs/fireworks-reference.md` | Fireworks API / training / deployment reference with code |
 | `docs/project-brief.md` | **The locked project**: idea, pitch, cited numbers, eval design, demo, open questions |
-| `docs/plan.md` | **3-engineer build plan**: roles, timeline, gates, harness ideas |
 | `docs/decisions.md` | Running decision log, newest first |
 | `docs/storyline.md` | **Pitch plan + 120 s script**: who owns what, timeline → pitch, every `[slot]` and its source file |
 | `docs/research/` | Raw sources: verbatim brief, full site scrape, raw subagent research |
@@ -99,6 +98,6 @@ Commands:
 - **Task: LOCKED 12:28 = SimBench "synthetic focus group"**. **Full brief: `docs/project-brief.md` (read it first).** Given a group description + multiple-choice question, predict the % of the group choosing each option. Pitch: market researchers / product teams; demo hook = Oct-2026 CA ballot polls by age (post-cutoff).
 - **Data:** `data/test.jsonl` **LOCKED** (5,316 rows, 2,116 question clusters, sha256 in `data/split_manifest.json`); `data/dev.jsonl` (1,490 rows, 542 questions; iterate here); `data/train.jsonl` + `data/train_sft.jsonl` (6,704 rows). Mixes: `data/train_sft_3k.jsonl`, `train_sft_pop3k.jsonl`, `train_sft_poph3k.jsonl` (`eval/make_mixes.py`). Built by `eval/prep_simbench.py` from `data/raw/simbench/` (gitignored). `scripts/make_splits.py` (Grouped-only) is superseded, see README.
 - **Eval:** `eval/tasks/simbench.py` = official SimBench prompt + metric (score = S/100, units = top-answer match for McNemar). No-AI analysis on dev (`results/simbench/offline_dev_analysis.json`): uniform ~0, dataset average 17.9, 10-nearest-questions 22.7; true answer sharpened^2 56.8, one-hot -30.6 (overconfidence is costly).
-- **Plan:** `docs/plan.md` (pre-registered: winner = best dev Pop score; headline = Pop-half gap over the frontier on test).
+- **Plan:** `EXPERIMENTS.md` is the shared team protocol (pre-registered: winner = best dev Pop score; the winner runs once on test). Personal plans and notes stay out of the repo (`docs/plan.md` is gitignored); the repo holds shared code, the protocol, and everyone's results and reports.
 - **Training:** serverless LoRA via `train/train_sft.py` (setup in README; `cookbook/` and `.venv-train/` are local, gitignored). Run table + selection rule: `docs/training-log.md`. Per-run logs land in `runs/` (local, gitignored).
 - **Open:** a closed-model key for the required frontier baseline.

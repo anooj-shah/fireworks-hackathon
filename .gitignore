@@ -14,3 +14,5 @@ cookbook/
 .venv-train/
 runs/
 CLAUDE.local.md
+# personal planning notes stay local (each person's own)
+docs/plan.md
