@@ -1,0 +1,33 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+prefill_queue_duration is unavailable; AdaptiveConcurrencyController is using HTTP 429/503 and transport-error congestion signals instead
+{
+  "time": "2026-11-02T14:26:21",
+  "task": "simbench",
+  "model": "qwen-base",
+  "model_id": "accounts/fireworks/models/qwen3p6-35b-a3b",
+  "label": "polls2026-base",
+  "closed": false,
+  "data": "data/ext_polls2026.jsonl",
+  "n": 49,
+  "errors": 0,
+  "score": 0.18363982719315286,
+  "m_simbench": 18.36398271931529,
+  "m_top1": 0.6530612244897959,
+  "m_parse_ok": 1.0,
+  "m_simbench_pop": -9.310960352042803,
+  "m_n_pop": 7,
+  "m_simbench_grouped": 22.976473231208303,
+  "m_n_grouped": 42,
+  "m_simbench_median": 16.96400980788897,
+  "p50_latency": 3.6649268330002087,
+  "p95_latency": 7.518789042000208,
+  "mean_prompt_tokens": 388.2857142857143,
+  "mean_completion_tokens": 21.857142857142858,
+  "cost_per_1k": 0.20390785714285717,
+  "throughput_rps": 5.074549424214083,
+  "concurrency": 32,
+  "results_file": "results/simbench/qwen-base__polls2026-base__142621.jsonl"
+}
+--- sample pop-polls2026-igs2610-prop3 S= 41.6 | {"A": 65, "B": 25, "C": 10}
+--- sample grouped-polls2026-igs2610-prop3-age18-29 S= 84.2 | {"A": 75, "B": 15, "C": 10}
+--- sample grouped-polls2026-igs2610-prop3-age30-39 S= 83.4 | {"A": 75, "B": 15, "C": 10}

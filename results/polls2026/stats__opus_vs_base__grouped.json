@@ -1,0 +1,34 @@
+[
+  {
+    "base": "qwen-base:polls2026-base",
+    "new": "claude-opus-5-5:polls2026-opus-high",
+    "subset": "grouped",
+    "base_score": 0.22976473231208303,
+    "new_score": 0.6372754202634481,
+    "mcnemar_top1": {
+      "only_new": 9,
+      "only_base": 2,
+      "units": 42,
+      "p": 0.0654296875
+    },
+    "closer": {
+      "new_closer": 6,
+      "base_closer": 1,
+      "ties": 0,
+      "n_groups": 7,
+      "win_rate": 0.8571428571428571,
+      "p": 0.125
+    },
+    "bootstrap": {
+      "gap": 0.40751068795136514,
+      "ci_low": 0.1644442745478277,
+      "ci_high": 0.6238456890124867,
+      "ahead": 4999,
+      "B": 5000,
+      "n_groups": 7,
+      "n_items": 42
+    },
+    "unpaired_ids": 0,
+    "significant": false
+  }
+]

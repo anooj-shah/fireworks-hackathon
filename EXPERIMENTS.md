@@ -70,6 +70,23 @@ It prints two tests, and a gain counts as **real only when both agree**:
 
 It also prints McNemar on "top answer matches" for reference. That one ignores the spread, so it isn't part of the verdict. Other subsets: `--subset grouped`, `--subset all`, `--survey-only`.
 
+### 3b. Outside test sets (run your winner on these too)
+These are extra **zero-shot** checks of whether a fine-tune generalizes beyond SimBench's sources. They're **exploratory**: they are not the selection metric and not the headline. **Never train on them.** Each uses the same row format, prompt and grader as SimBench (norms are in `data/simbench_norms.json`).
+
+| Set | File | What | Size | Build script / sources |
+|---|---|---|---|---|
+| `twin2k` | `data/ext_twin2k.jsonl` | Twin-2K-500 (CC-BY-4.0): about 2,058 US adults; personality, pricing, econ-preference and heuristics questions; population + by age | 977 rows / 424 questions | `eval/prep_twin2k.py` |
+| `polls2026` | `data/ext_polls2026.jsonl` | Real **Oct 2026** Berkeley IGS poll of CA likely voters, 7 state props × (all / 5 age groups / SF Bay Area). **Post-cutoff for every model** | 49 rows / 7 questions | `eval/prep_polls2026.py`, `docs/polls2026-sources.md` |
+
+```bash
+# label MUST start with the set name (twin2k- / polls2026-), then move the rows out of results/simbench/
+.venv-train/bin/python train/sample_eval.py --base <key> --from-checkpoint <account>/<run-id>/step-<N> --data data/ext_twin2k.jsonl --label twin2k-<run> -c 48
+.venv-train/bin/python train/sample_eval.py --base <key> --data data/ext_twin2k.jsonl --label twin2k-<run>-base -c 48
+.venv/bin/python eval/move_ext_results.py      # keeps results/simbench/summary.jsonl SimBench-only
+.venv/bin/python eval/stats.py --task twin2k --base <model>:twin2k-<run>-base --new <model>:twin2k-<run> --subset all
+```
+Results so far (q36-3k-1e4 vs its untrained base; Claude Opus 5.5 on polls2026) are in `results/twin2k/` and `results/polls2026/` (`summary.jsonl` + `stats*.json`). Report outside-set scores in your experiment's Notes, labeled "exploratory".
+
 ## 4. Write the report (one file per experiment)
 Copy `experiments/_TEMPLATE.md` to `experiments/<run>.md` and fill in **every** field. Every number must be copied from a committed `results/` file, never typed from memory. Report failed and losing runs too: the judges score "meaningful experiments (report the losers too)".
 

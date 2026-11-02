@@ -23,3 +23,5 @@ docs/project-brief.md
 docs/playbook.md
 docs/storyline.md
 docs/research/
+# outside-test failed runs can contain account/session IDs
+results/*/failed_attempts.jsonl

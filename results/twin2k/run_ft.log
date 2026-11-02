@@ -1,0 +1,38 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+prefill_queue_duration is unavailable; AdaptiveConcurrencyController is using HTTP 429/503 and transport-error congestion signals instead
+DeploymentSampler request 4a8eb09fc6c44ec79ca145616598afe4: Transient HTTP 503 (attempt 1/7); retrying after 5.0s.
+DeploymentSampler request acf6c43a5cce4d3ca9d86aa727a52f05: Transient HTTP 503 (attempt 1/7); retrying after 5.0s.
+DeploymentSampler request 94ced4910e094a7aaf664e6640c69b60: Transient HTTP 503 (attempt 1/7); retrying after 5.0s.
+DeploymentSampler request c866b77d28444886a0f78018205c07d2: Transient HTTP 503 (attempt 1/7); retrying after 5.0s.
+DeploymentSampler request 259eef3a440449b08da352e75d54b6b1: Transient HTTP 503 (attempt 1/7); retrying after 5.0s.
+{
+  "time": "2026-11-02T14:23:46",
+  "task": "simbench",
+  "model": "ft-qwen",
+  "model_id": "accounts/fireworks/models/qwen3p6-35b-a3b + LoRA twin2k-q36-3k-1e4 (step-188)",
+  "label": "twin2k-q36-3k-1e4",
+  "closed": false,
+  "data": "data/ext_twin2k.jsonl",
+  "n": 977,
+  "errors": 0,
+  "score": 0.20172439761812852,
+  "m_simbench": 20.172439761812853,
+  "m_top1": 0.5926305015353122,
+  "m_parse_ok": 1.0,
+  "m_simbench_pop": 23.127560834942297,
+  "m_n_pop": 424,
+  "m_simbench_grouped": 17.906668812433317,
+  "m_n_grouped": 553,
+  "m_simbench_median": 37.40508330549617,
+  "p50_latency": 2.0393313329986995,
+  "p95_latency": 3.9108006249989558,
+  "mean_prompt_tokens": 266.9682702149437,
+  "mean_completion_tokens": 33.150460593654046,
+  "cost_per_1k": 0.1643915864892528,
+  "throughput_rps": 20.071819242686683,
+  "concurrency": 48,
+  "results_file": "results/simbench/ft-qwen__twin2k-q36-3k-1e4__142346.jsonl"
+}
+--- sample pop-twin2k-0000 S= 83.5 | {"A": 17, "B": 22, "C": 37, "D": 23, "E": 1}
+--- sample pop-twin2k-0001 S= 99.0 | {"A": 49, "B": 51}
+--- sample pop-twin2k-0002 S= 68.3 | {"A": 22, "B": 33, "C": 26, "D": 19}
