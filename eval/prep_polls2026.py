@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Build a tiny OUTSIDE (zero-shot, post-training-cutoff) test set from real October-2026 polls.
+"""Build a small extra test set from a real October-2026 California poll.
 
-Exploratory demo check, NOT the headline eval. Same row format as the `grouped`/`pop` rows of data/test.jsonl.
+The poll came out after every model was trained, so no model can have seen the answers. Same row format as data/test.jsonl.
 
 Source (saved by hand with curl into data/raw/polls2026/, gitignored; untrusted, only parsed as PDF text):
   igs_2026-22_tabulations_props.pdf  Berkeley IGS Poll, Release #2026-22 tabulations (eScholarship qt1vp9q3f9),

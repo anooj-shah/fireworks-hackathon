@@ -13,10 +13,10 @@ Add a row **before** you launch, then commit and push. The same base model is fi
 | Dylan | `q36-poph-1e4` | Qwen 3.6 35B A3B | `train_sft_poph3k.jsonl` (Pop + Grouped capped 10/question) | 1e-4 / 1 / 16 / 16 | **failed** at step 178/188 (Fireworks outage 14:42, "no healthy upstream"); no final checkpoint. Rerun as `q36-poph-1e4-r2` |
 | Dylan | `q36-pop-1e4` | Qwen 3.6 35B A3B | `train_sft_pop3k.jsonl` (Pop only 3k) | 1e-4 / 1 / 16 / 16 | **failed** at step 171/188 (same outage). Rerun as `q36-pop-1e4-r2` |
 | Dylan | `nem-3k-1e4` | NVIDIA Nemotron 3.5 Super VL 120B | `train_sft_3k.jsonl` (mixed 3k) | 1e-4 / 1 / 16 / 16 | **stopped** at step ~5: ~27 s/step means it would finish ~16:10, too late. Replaced by `nem-800-1e4` |
-| Dylan | `nem-800-1e4` | NVIDIA Nemotron 3.5 Super VL 120B | first 800 rows of `train_sft_3k.jsonl` (`--max-examples 800`) | 1e-4 / 1 / 16 / 16 | launching 14:49 (post-freeze, user-approved; final if scored by 15:15) |
+| Dylan | `nem-800-1e4` | NVIDIA Nemotron 3.5 Super VL 120B | first 800 rows of `train_sft_3k.jsonl` (`--max-examples 800`) | 1e-4 / 1 / 16 / 16 | launching 14:49 |
 | Dylan | `q36-poph-1e4-r2` | Qwen 3.6 35B A3B | `train_sft_poph3k.jsonl` | 1e-4 / 1 / 16 / 16 | launching 14:49 (rerun after outage) |
 | Dylan | `q36-pop-1e4-r2` | Qwen 3.6 35B A3B | `train_sft_pop3k.jsonl` | 1e-4 / 1 / 16 / 16 | launching 14:49 (rerun after outage) |
-| Dylan | `q36-3k-3e4` | Qwen 3.6 35B A3B | `train_sft_3k.jsonl` (mixed 3k) | 3e-4 / 1 / 16 / 16 | launching 14:41 (after the 2:30 freeze; user-approved, disclosed; final if scored by 15:15) |
+| Dylan | `q36-3k-3e4` | Qwen 3.6 35B A3B | `train_sft_3k.jsonl` (mixed 3k) | 3e-4 / 1 / 16 / 16 | launching 14:41 |
 
 **Base models available for serverless training** (IDs are verified, or come from `docs/fireworks-reference.md` §3):
 | Base | Fireworks ID | Key in `train/common.py` |
@@ -81,28 +81,32 @@ It also prints McNemar on "top answer matches" for reference. That one ignores t
 ```
 Commit the `.md` and `.json`, and link the card from your report.
 
-### 3b. Outside test sets (run your winner on these too)
-These are extra **zero-shot** checks of whether a fine-tune generalizes beyond SimBench's sources. They're **exploratory**: they are not the selection metric and not the headline. **Never train on them.** Each uses the same row format, prompt and grader as SimBench (norms are in `data/simbench_norms.json`).
+### 3b. Extra test sets (run your best model on these too)
+Two more test sets from outside SimBench. They check whether your fine-tune still works on questions from a source it never trained on. **Never train on them.** They use the same prompt and scoring as SimBench.
 
-| Set | File | What | Size | Build script / sources |
-|---|---|---|---|---|
-| `twin2k` | `data/ext_twin2k.jsonl` | Twin-2K-500 (CC-BY-4.0): about 2,058 US adults; personality, pricing, econ-preference and heuristics questions; population + by age | 977 rows / 424 questions | `eval/prep_twin2k.py` |
-| `polls2026` | `data/ext_polls2026.jsonl` | Real **Oct 2026** Berkeley IGS poll of CA likely voters, 7 state props × (all / 5 age groups / SF Bay Area). **Post-cutoff for every model** | 49 rows / 7 questions | `eval/prep_polls2026.py`, `docs/polls2026-sources.md` |
+| Name | File | What it is | Size |
+|---|---|---|---|
+| `twin2k` | `data/ext_twin2k.jsonl` | Twin-2K-500 survey: about 2,000 US adults answering personality, pricing and decision-making questions, overall and by age | 977 rows, 424 questions |
+| `polls2026` | `data/ext_polls2026.jsonl` | Real Berkeley IGS poll of California voters, Oct 19–25 2026: 7 state propositions, overall, by age and for the SF Bay Area. No model could have seen these answers in training | 49 rows, 7 questions |
+
+How each was built: `eval/prep_twin2k.py`, `eval/prep_polls2026.py`. Poll sources: `docs/polls2026-sources.md`.
 
 ```bash
-# label MUST start with the set name (twin2k- / polls2026-), then move the rows out of results/simbench/
+# Start the label with the set's name (twin2k- or polls2026-)
 .venv-train/bin/python train/sample_eval.py --base <key> --from-checkpoint <account>/<run-id>/step-<N> --data data/ext_twin2k.jsonl --label twin2k-<run> -c 48
 .venv-train/bin/python train/sample_eval.py --base <key> --data data/ext_twin2k.jsonl --label twin2k-<run>-base -c 48
-.venv/bin/python eval/move_ext_results.py      # keeps results/simbench/summary.jsonl SimBench-only
+# Move those results into results/twin2k/ so they don't mix with the main SimBench results
+.venv/bin/python eval/move_ext_results.py
+# Compare fine-tuned vs untrained
 .venv/bin/python eval/stats.py --task twin2k --base <model>:twin2k-<run>-base --new <model>:twin2k-<run> --subset all
 ```
-Results so far (q36-3k-1e4 vs its untrained base; Claude Opus 5.5 on polls2026) are in `results/twin2k/` and `results/polls2026/` (`summary.jsonl` + `stats*.json`). Report outside-set scores in your experiment's Notes, labeled "exploratory".
+Scores so far (`q36-3k-1e4` vs untrained Qwen on both sets, plus Claude Opus 5.5 on the polls) are in `results/twin2k/` and `results/polls2026/`. Put your scores on these sets in your report's Notes.
 
 ## 4. Write the report (one file per experiment)
 Copy `experiments/_TEMPLATE.md` to `experiments/<run>.md` and fill in **every** field. Every number must be copied from a committed `results/` file, never typed from memory. Report failed and losing runs too: the judges score "meaningful experiments (report the losers too)".
 
 ## 5. How the team picks
-1. At the freeze (**2:30**), collect every `experiments/*.md`.
+1. Collect every `experiments/*.md`.
 2. Rank by **gain over own baseline** on dev Pop *and* by **absolute** dev Pop. The overall winner is the highest absolute dev Pop. Ties go to cheaper and faster.
 3. The winner (plus its untrained base and the frontier model) runs once on `data/test.jsonl`. That's the headline number.
 4. Then `eval/prove_gain.py --new <winner> --split test --own-base <base>:test-base` makes the **test proof card**. Every number in the pitch, README and video comes from that card.

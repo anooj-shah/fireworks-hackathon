@@ -1,4 +1,4 @@
-Twin2K per-block mean SimBench S (exploratory; from results/twin2k/*__141641.jsonl and *__142346.jsonl)
+Twin-2K-500: average SimBench score by question type (from results/twin2k/*__141641.jsonl and *__142346.jsonl)
 
 | subset | block | rows | base S | fine-tune S | base top-1 | fine-tune top-1 |
 |---|---|---|---|---|---|---|

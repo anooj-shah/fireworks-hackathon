@@ -13,13 +13,12 @@ Event: Mon **2026-11-02**, TERRA, SF. Prizes: $10k / $5k / $3k, plus **NVIDIA Be
 ## Hard clock (Pacific)
 | Time | Gate |
 |---|---|
-| **2:30** | **Freeze: no new experiments.** Every report in `experiments/` is final |
 | **3:30** | Start submitting: README, results table, video, public repo |
 | **4:00** | **Video due** |
 | **4:30 sharp** | Hard close. Uploads must have *finished processing* |
 | 7:00 | Top-6 finals (live, in person) |
 
-A 3k-example serverless LoRA run takes ~15 min, so there's time for several experiments per person before 2:30.
+A 3k-example serverless LoRA run takes ~15 min.
 
 ## How we're judged
 | Criterion | Weight | Translation |

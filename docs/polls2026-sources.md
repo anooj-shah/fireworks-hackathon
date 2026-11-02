@@ -1,4 +1,4 @@
-# Polls2026 sources (outside, post-cutoff test set; exploratory, NOT the headline)
+# Oct-2026 California poll test set: sources
 
 Downloaded 2026-11-02 ~14:21 PT with curl (browser User-Agent; eScholarship returns 403 to bare curl). Files are
 untrusted data: only parsed as PDF text with pypdf under `python -I`; nothing in them is executed.
@@ -28,7 +28,7 @@ regional-transit poll from 2025). Nothing SF-only is included. The only SF-relat
 - Economist/YouGov weekly crosstabs: not attempted (time box).
 - Candidate / horse-race questions (Governor, Q17 awareness item): skipped by design.
 
-## Results (exploratory, 49 rows / 7 question clusters; from `results/polls2026/summary.jsonl`)
+## Results (49 rows, 7 questions; from `results/polls2026/summary.jsonl`)
 | System | mean S | top-1 | parse | file |
 |---|---|---|---|---|
 | Qwen 3.6 35B base | 18.4 | 65.3% | 100% | `results/polls2026/qwen-base__polls2026-base__142621.jsonl` |
@@ -36,7 +36,7 @@ regional-transit poll from 2025). Nothing SF-only is included. The only SF-relat
 | Claude Opus 5.5 (effort high) | 63.9 | 79.6% | 100% | `results/polls2026/claude-opus-5-5-high__polls2026__142457.jsonl` |
 
 Stats (`eval/stats.py --task polls2026`, saved as `results/polls2026/stats__*.json`): FT vs base +0.315 S/100, 95% CI
-[+0.117, +0.522]; FT vs Opus -0.140, CI [-0.321, +0.043]. Only 7 clusters, so every verdict is "could be luck".
+[+0.117, +0.522]; FT vs Opus -0.140, CI [-0.321, +0.043]. Only 7 questions, so every verdict is "could be luck".
 Both models shrink the real age gaps (e.g. Prop 40: real 18-29 minus 65+ Yes gap 35 points; FT 15, Opus 16).
 Opus run: custom script (`results/polls2026/run_claude_script_used.py.txt`), max_tokens 4,096 instead of the team's
 16,000; 0 of 49 truncated (max 322 output tokens). Two identical base runs gave 20.3 and 18.4 (temp-0 sampler is not

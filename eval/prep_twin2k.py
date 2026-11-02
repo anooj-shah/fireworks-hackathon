@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Build an OUTSIDE (zero-shot) test set from Twin-2K-500, in exactly the data/test.jsonl row format.
+"""Build an extra test set from the Twin-2K-500 survey, in the same row format as data/test.jsonl.
 
-Exploratory "does the SimBench fine-tune generalize?" check. NOT the headline eval.
+Checks whether a model fine-tuned on SimBench still works on a survey it never trained on.
 Source: HF dataset LLM-Digital-Twin/Twin-2K-500 (Toubia et al. 2025, arXiv 2505.17479), CC-BY-4.0.
 2,058 US online-panel participants; not one of SimBench's sources, so never seen in training.
 
