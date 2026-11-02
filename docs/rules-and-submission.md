@@ -1,6 +1,6 @@
 # Rules, submission & disclosure
 
-Sources: the HackerSquad builder guide (Rules + Submission & judging tabs), scraped 10:30 on 11/2. Full text is in `research/event-hackersquad-scrape.md`; the verbatim brief is in `research/brief.md`.
+Sources: the HackerSquad builder guide (Rules + Submission & judging tabs), scraped 10:30 on 11/2.
 Submit at https://hackersquad.io/builders/dashboard/events/cmvhfug2f0014pg23mya02wru/builder#project (Builder Terminal → `./project.sh`).
 
 ## 1. Deadlines (Pacific)

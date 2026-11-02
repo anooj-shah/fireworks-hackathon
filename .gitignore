@@ -14,5 +14,12 @@ cookbook/
 .venv-train/
 runs/
 CLAUDE.local.md
-# personal planning notes stay local (each person's own)
+# personal planning notes stay local (each person's own); shared docs are only
+# docs/fireworks-reference.md and docs/rules-and-submission.md
 docs/plan.md
+docs/decisions.md
+docs/training-log.md
+docs/project-brief.md
+docs/playbook.md
+docs/storyline.md
+docs/research/

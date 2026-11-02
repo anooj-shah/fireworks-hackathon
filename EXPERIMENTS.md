@@ -72,5 +72,5 @@ Copy `experiments/_TEMPLATE.md` to `experiments/<run>.md` and fill in **every** 
 ## 6. House rules
 - No per-person details in committed files: no keys, account names, credit balances, session IDs or personal links. Track your own sessions and deployments in `CLAUDE.local.md` (gitignored) and **delete them when you're done**.
 - Every number traces to a file in `results/`.
-- Log material choices in `docs/decisions.md`.
+- Explain material choices (and anything you changed mid-run) in your report's Notes.
 - Pull before you push. Don't rewrite anyone else's report.

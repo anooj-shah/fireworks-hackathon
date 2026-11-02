@@ -19,13 +19,13 @@ different demographic groups answer survey/opinion questions, scored against
 
 Both split by question, so neither leaks. We use the bigger one because the cluster bootstrap resamples *questions*: 2,116 clusters give a far tighter confidence interval than 30, and it still has more demographic (Grouped) test questions. `scripts/make_splits.py` and its CSVs are kept for reference only. Don't evaluate on them.
 
-Pipeline (details in `CLAUDE.md` and `docs/`):
+Pipeline (details in `CLAUDE.md` and `EXPERIMENTS.md`):
 - `eval/prep_simbench.py`: builds the split from `data/raw/simbench/SimBench{Pop,Grouped}.csv` (download from HF, not committed).
 - `eval/tasks/simbench.py`: official SimBench "verbalized" prompt + score (S = 100·(1 − TVD/dataset norm)).
 - `eval/run.py`: scores any OpenAI-compatible model (frontier baselines, Fireworks serverless). `eval/stats.py`: McNemar + cluster bootstrap.
 - `train/train_sft.py`: serverless LoRA SFT on Fireworks (wraps `fw-ai/cookbook`'s `sft_loop`). `train/sample_eval.py`: scores a base model or fine-tuned checkpoint with the same prompt and grader.
 - Training setup: `git clone --depth 1 https://github.com/fw-ai/cookbook cookbook && python3.12 -m venv .venv-train && .venv-train/bin/pip install -e ./cookbook/training python-dotenv`.
-- Run log, every variant and the winner-selection rule: `docs/training-log.md`. Decisions: `docs/decisions.md`. Results: `results/simbench/`.
+- Team protocol and winner-selection rule: `EXPERIMENTS.md`. One report per experiment: `experiments/`. Scored runs: `results/simbench/`.
 
 **Why this can win:** the paper's best model (Claude 3.7 Sonnet) only scores
 40.80/100, and the paper finds alignment/instruction-tuning actively *hurts*
