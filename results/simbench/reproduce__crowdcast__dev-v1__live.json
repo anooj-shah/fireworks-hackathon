@@ -1,7 +1,5 @@
 {
- "time": "2026-11-02T15:00:22",
  "run": "crowdcast:dev-v1",
- "mode": "live",
  "live_members": {
   "O": "fw-deepseek-v4p1-flash:hx-dev-repro"
  },

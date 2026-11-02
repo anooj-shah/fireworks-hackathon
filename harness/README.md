@@ -22,7 +22,7 @@ group + question + options
 | Survey memory alone | 18.2 | 27.1 | 22.6 | 0 | `crowdcast_fit__v1.json` (`singles`) |
 
 - **Proof card** (`results/simbench/prove__crowdcast__dev-v1__dev.md`):
-  - vs Opus on Pop: "can't be told apart", gap −1.4 (95% range −6.0 to +3.3), **19× cheaper**.
+  - vs Opus on Pop: "can't be told apart", gap −1.4 (95% range −6.0 to +3.3). **But the per-question "closer to real people" test favors Opus: 242 vs 296 questions, p = 0.022.** **19× cheaper.**
   - vs Haiku and vs our untrained base: real gains.
 - **Every candidate and ablation is in `crowdcast_fit__v1.json`, losers included:**
   - Combined with Kimi K3: 39.1. Combined with Qwen 3.8 Max: 39.7.

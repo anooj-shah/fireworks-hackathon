@@ -1,7 +1,5 @@
 {
- "time": "2026-11-02T15:00:13",
  "run": "crowdcast:dev-v1",
- "mode": "exact",
  "live_members": {},
  "inputs_ok": true,
  "weights": {

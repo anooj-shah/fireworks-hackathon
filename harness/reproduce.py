@@ -25,7 +25,6 @@ import hashlib
 import json
 import statistics
 import sys
-from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -144,7 +143,7 @@ def main():
     for k in ("pop", "grouped", "all"):
         if k in rep and com.get(k) is not None:
             print(f"{k:8} {com[k]:10.4f} {rep[k]:11.4f} {rep[k] - com[k]:+9.4f}")
-    out = {"time": datetime.now().isoformat(timespec="seconds"), "run": a.run, "mode": "live" if live else "exact",
+    out = {"run": a.run,  # no timestamp: re-running writes an identical file "mode": "live" if live else "exact",
            "live_members": live, "inputs_ok": ok, "weights": weights, "committed": com, "reproduced": rep,
            "n_items": len(recs)}
     if live:
