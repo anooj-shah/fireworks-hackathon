@@ -1,0 +1,34 @@
+[
+  {
+    "base": "glm-base:dev-base",
+    "new": "ft-glm:glm-800-1e4",
+    "subset": "pop",
+    "base_score": 0.32381437447100886,
+    "new_score": 0.32439149220304264,
+    "mcnemar_top1": {
+      "only_new": 112,
+      "only_base": 81,
+      "units": 754,
+      "p": 0.030549749610096745
+    },
+    "closer": {
+      "new_closer": 273,
+      "base_closer": 244,
+      "ties": 21,
+      "n_groups": 538,
+      "win_rate": 0.528046421663443,
+      "p": 0.21812069174357313
+    },
+    "bootstrap": {
+      "gap": 0.0005771177320337697,
+      "ci_low": -0.04878470246202352,
+      "ci_high": 0.047841591526054966,
+      "ahead": 2568,
+      "B": 5000,
+      "n_groups": 538,
+      "n_items": 754
+    },
+    "unpaired_ids": 0,
+    "significant": false
+  }
+]
