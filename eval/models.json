@@ -6,6 +6,9 @@
 
   "closed-openai": {"base_url": "https://api.openai.com/v1", "api_key_env": "OPENAI_API_KEY",
                     "model": "FILL_ME", "price_in": null, "price_out": null, "closed": true, "params": {}},
+  "gpt-61-terra": {"base_url": "https://api.openai.com/v1", "api_key_env": "OPENAI_API_KEY",
+                   "model": "gpt-6.1-terra", "price_in": null, "price_out": null, "closed": true,
+                   "use_max_completion_tokens": true, "params": {}},
   "closed-anthropic": {"base_url": "https://api.anthropic.com/v1/", "api_key_env": "ANTHROPIC_API_KEY",
                        "model": "FILL_ME", "price_in": null, "price_out": null, "closed": true,
                        "supports_response_format": false, "params": {"temperature": 0}},

@@ -55,6 +55,9 @@ async def call_model(client, cfg, task, messages, stream):
     kwargs = {"model": cfg["model"], "messages": messages}
     kwargs.update(cfg.get("params", {}))
     kwargs.update(getattr(task, "REQUEST_PARAMS", {}))
+    # Some models (e.g. newer OpenAI) require max_completion_tokens instead of max_tokens
+    if cfg.get("use_max_completion_tokens") and "max_tokens" in kwargs:
+        kwargs["max_completion_tokens"] = kwargs.pop("max_tokens")
     rf = getattr(task, "response_format", None)
     if rf and cfg.get("supports_response_format", True):
         kwargs["response_format"] = rf
