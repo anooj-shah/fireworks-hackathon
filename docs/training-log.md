@@ -1,5 +1,7 @@
 # Training log (fine-tunes on Fireworks)
 
+> Team-wide protocol and per-experiment reports now live in [`EXPERIMENTS.md`](../EXPERIMENTS.md) and `experiments/`. This file is Dylan's Qwen 3.6 run history.
+
 Running log of every training run: setup, what's running, what each one cost, and how we pick the winner. Newest entries go at the bottom of the timeline. Every score here must point to a file in `results/`.
 
 ## Rule for picking the winner (decided 13:30, before any run)

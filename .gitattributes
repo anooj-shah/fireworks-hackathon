@@ -1,0 +1,2 @@
+# append-only results log: keep both sides' rows when two people push
+results/simbench/summary.jsonl merge=union

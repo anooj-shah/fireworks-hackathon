@@ -2,6 +2,8 @@
 
 Every agent working in this repo reads this file first. Keep it accurate. Update **Live status** when something changes.
 
+> **Team protocol: read [`EXPERIMENTS.md`](EXPERIMENTS.md) before training or evaluating anything.** Everyone runs the same eval; each person fine-tunes a different base model and compares it to that model untrained; every experiment gets a report in `experiments/` in the same format; the team picks the winner from those reports.
+
 ## Mission
 **"Make your own frontier."** Pick a task, then use an **open model on Fireworks** (fine-tune, harness, or routing) to **beat a frontier closed-model baseline** on quality, cost, or latency. Back it with a rigorous held-out eval and statistical tests, and show the business value.
 Event: Mon **2026-11-02**, TERRA, SF. Hosts: Fireworks + Microsoft + NVIDIA. Prizes: $10k / $5k / $3k, plus **NVIDIA Best-Use (DGX Spark)**. **Every prize requires using Fireworks.**
@@ -63,6 +65,9 @@ The team lead's four principles take priority when making tradeoffs. The rubric 
 | `eval/frontier.py` | Quality-vs-cost/latency plot + markdown table from `results/<task>/summary.jsonl` |
 | `eval/models.json` | Model registry (base_url, key env, model id, $/1M in/out, `closed` flag). **Fill `FILL_ME`s** |
 | `eval/tasks/_template.py` | Task interface: `build_messages(item)`, `grade(item, output) -> {"score", …}` |
+| `EXPERIMENTS.md` | **Team protocol**: claim a base model, fixed eval, run commands, report format, how we pick |
+| `experiments/` | One report per training experiment (`_TEMPLATE.md`) |
+| `train/` | `train_sft.py` (serverless LoRA SFT) and `sample_eval.py` (score base/fine-tuned on the training sampler) |
 | `data/` | Datasets. `data/test.jsonl` is **locked** once written, never edited |
 | `results/<task>/` | Run outputs (`summary.jsonl` is committed) |
 | `docs/playbook.md` | **How to win:** the judge's six-step template, stats methods, task criteria, timeline |

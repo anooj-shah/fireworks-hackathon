@@ -4,6 +4,8 @@ Fine-tune + harness an open model to beat frontier models at simulating how
 different demographic groups answer survey/opinion questions, scored against
 [SimBench](https://huggingface.co/datasets/pitehu/SimBench) (`SimBenchPop` + `SimBenchGrouped`).
 
+**Team members: read [`EXPERIMENTS.md`](EXPERIMENTS.md) first** (who trains which model, the fixed eval, and the report format in `experiments/`).
+
 ## Official split and pipeline (read first)
 
 **The official held-out test set is `data/test.jsonl`** (5,316 rows, 2,116 question clusters, SimBenchPop + SimBenchGrouped). It's locked: its sha256 is in `data/split_manifest.json`.
