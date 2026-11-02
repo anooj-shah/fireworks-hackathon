@@ -84,17 +84,27 @@ It also prints McNemar on "top answer matches" for reference. That one ignores t
 Commit the `.md` and `.json`, and link the card from your report.
 
 ### 3b. Extra test sets (run your best model on these too)
-Two more test sets from outside SimBench. They check whether your fine-tune still works on questions from a source it never trained on. **Never train on them.** They use the same prompt and scoring as SimBench.
+Three more test sets from outside SimBench. They check whether your fine-tune still works on questions from a source it never trained on. **Never train on them.** They use the same prompt and scoring as SimBench.
 
 | Name | File | What it is | Size |
 |---|---|---|---|
 | `twin2k` | `data/ext_twin2k.jsonl` | Twin-2K-500 survey: about 2,000 US adults answering personality, pricing and decision-making questions, overall and by age | 977 rows, 424 questions |
 | `polls2026` | `data/ext_polls2026.jsonl` | Real Berkeley IGS poll of California voters, Oct 19–25 2026: 7 state propositions, overall, by age and for the SF Bay Area. No model could have seen these answers in training | 49 rows, 7 questions |
+| `sfballot` | `data/ext_sfballot.jsonl` | Real San Francisco election results: 19 local measures (Nov 2024 and June 2026), citywide and for each of the 11 Supervisorial Districts, from the official Department of Elections vote counts | 228 rows, 19 measures |
 
-How each was built: `eval/prep_twin2k.py`, `eval/prep_polls2026.py`. Poll sources: `docs/polls2026-sources.md`.
+How each was built: `eval/prep_twin2k.py`, `eval/prep_polls2026.py`, `eval/prep_sfballot.py`. Sources: `docs/polls2026-sources.md`, `docs/sfballot-sources.md`.
+
+Easiest way to run: `train/sample_eval_outside.py` (your Qwen/Nemotron model) and `eval/run_claude_outside.py` (Claude) save results straight into `results/<set>/`, so the main SimBench results stay clean:
+```bash
+.venv-train/bin/python train/sample_eval_outside.py results/sfballot --base <key> --from-checkpoint <account>/<run-id>/step-<N> --data data/ext_sfballot.jsonl --label sfballot-<run>
+python3 -I eval/election_metrics.py ours=results/sfballot/<your answers file>.jsonl   # points off, winners called, district order
+```
+**San Francisco, Nov 3 2026:** predictions for all 10 local measures (citywide + every district) were saved on Nov 2, before the vote, in `results/sfballot/prereg_2026-11-03/` with fingerprints. Once official results are out, `eval/score_sf2026.py` scores them (see the README in that folder).
+
+Or use `train/sample_eval.py` directly, then move the results:
 
 ```bash
-# Start the label with the set's name (twin2k- or polls2026-)
+# Start the label with the set's name (twin2k-, polls2026- or sfballot-)
 .venv-train/bin/python train/sample_eval.py --base <key> --from-checkpoint <account>/<run-id>/step-<N> --data data/ext_twin2k.jsonl --label twin2k-<run> -c 48
 .venv-train/bin/python train/sample_eval.py --base <key> --data data/ext_twin2k.jsonl --label twin2k-<run>-base -c 48
 # Move those results into results/twin2k/ so they don't mix with the main SimBench results
@@ -102,7 +112,7 @@ How each was built: `eval/prep_twin2k.py`, `eval/prep_polls2026.py`. Poll source
 # Compare fine-tuned vs untrained
 .venv/bin/python eval/stats.py --task twin2k --base <model>:twin2k-<run>-base --new <model>:twin2k-<run> --subset all
 ```
-Scores so far (`q36-3k-1e4` vs untrained Qwen on both sets, plus Claude Opus 5.5 on the polls) are in `results/twin2k/` and `results/polls2026/`. Put your scores on these sets in your report's Notes.
+Scores so far (`q36-3k-1e4` vs untrained Qwen on all three, plus Claude Opus 5.5 on the polls and SF) are in `results/twin2k/`, `results/polls2026/` and `results/sfballot/` (SF summary: `results/sfballot/election_metrics.md`). Put your scores on these sets in your report's Notes.
 
 ## 4. Write the report (one file per experiment)
 Copy `experiments/_TEMPLATE.md` to `experiments/<run>.md` and fill in **every** field. Every number must be copied from a committed `results/` file, never typed from memory. Report failed and losing runs too: the judges score "meaningful experiments (report the losers too)".

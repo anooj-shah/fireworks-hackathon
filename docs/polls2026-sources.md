@@ -38,6 +38,6 @@ regional-transit poll from 2025). Nothing SF-only is included. The only SF-relat
 Stats (`eval/stats.py --task polls2026`, saved as `results/polls2026/stats__*.json`): FT vs base +0.315 S/100, 95% CI
 [+0.117, +0.522]; FT vs Opus -0.140, CI [-0.321, +0.043]. Only 7 questions, so every verdict is "could be luck".
 Both models shrink the real age gaps (e.g. Prop 40: real 18-29 minus 65+ Yes gap 35 points; FT 15, Opus 16).
-Opus run: custom script (`results/polls2026/run_claude_script_used.py.txt`), max_tokens 4,096 instead of the team's
+Opus run: `eval/run_claude_outside.py`, max_tokens 4,096 instead of the team's
 16,000; 0 of 49 truncated (max 322 output tokens). Two identical base runs gave 20.3 and 18.4 (temp-0 sampler is not
 bit-reproducible).

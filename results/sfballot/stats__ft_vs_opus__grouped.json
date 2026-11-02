@@ -1,0 +1,34 @@
+[
+  {
+    "base": "claude-opus-5-5:sfballot-opus-high",
+    "new": "ft-qwen:sfballot-q36-3k-1e4",
+    "subset": "grouped",
+    "base_score": 0.23718512002245068,
+    "new_score": 0.2485806957759567,
+    "mcnemar_top1": {
+      "only_new": 22,
+      "only_base": 11,
+      "units": 209,
+      "p": 0.08014331245794892
+    },
+    "closer": {
+      "new_closer": 10,
+      "base_closer": 9,
+      "ties": 0,
+      "n_groups": 19,
+      "win_rate": 0.5263157894736842,
+      "p": 1.0
+    },
+    "bootstrap": {
+      "gap": 0.011395575753506016,
+      "ci_low": -0.3543378682291679,
+      "ci_high": 0.3884426191030224,
+      "ahead": 2543,
+      "B": 5000,
+      "n_groups": 19,
+      "n_items": 209
+    },
+    "unpaired_ids": 0,
+    "significant": false
+  }
+]

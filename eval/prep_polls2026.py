@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Build a small extra test set from a real October-2026 California poll.
 
-The poll came out after every model was trained, so no model can have seen the answers. Same row format as data/test.jsonl.
+The poll was published after the models' training cutoffs, so no model can have seen the answers.
+Same row format as data/test.jsonl. "Pop" rows = all likely voters; "Grouped" rows = one age band or region.
 
 Source (saved by hand with curl into data/raw/polls2026/, gitignored; untrusted, only parsed as PDF text):
   igs_2026-22_tabulations_props.pdf  Berkeley IGS Poll, Release #2026-22 tabulations (eScholarship qt1vp9q3f9),
@@ -15,7 +16,8 @@ Rows per proposition:
   pop      all likely voters (Total column)
   grouped  age 18-29 / 30-39 / 40-49 / 50-64 / 65 or older (net)   (even-numbered tables)
            SF Bay Area region                                        (odd-numbered tables)
-Also adds "pop/Polls2026" and "grouped/Polls2026" to data/simbench_norms.json, leaving every other key untouched.
+Also adds "pop/Polls2026" and "grouped/Polls2026" to data/simbench_norms.json (the per-dataset "average miss of a 50/50 guess" that the SimBench score divides by),
+leaving every other entry untouched.
 
   python3 -I eval/prep_polls2026.py <path to pypdf site dir>
 """
@@ -29,7 +31,7 @@ ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "data" / "raw" / "polls2026"
 PDF = RAW / "igs_2026-22_tabulations_props.pdf"
 OUT = ROOT / "data" / "ext_polls2026.jsonl"
-NORMS = ROOT / "data" / "simbench_norms.json"
+SCALE_FILE = ROOT / "data" / "simbench_norms.json"
 DATASET = "Polls2026"
 POLL = "BerkeleyIGS-2026-10"
 QIDS = ["Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16"]
@@ -145,8 +147,8 @@ def main():
             f.write(json.dumps({k: r[k] for k in key_order}) + "\n")
     print(f"wrote {len(rows)} rows / {len(QIDS)} questions -> {OUT.relative_to(ROOT)}")
 
-    # norms: re-read right before writing, touch only our keys
-    before = json.loads(NORMS.read_text())
+    # scoring scale: re-read right before writing, touch only our two entries
+    before = json.loads(SCALE_FILE.read_text())
     new = dict(before)
     for sub in ("pop", "grouped"):
         xs = [tvd_uniform(r["human"]) for r in rows if r["subset"] == sub]
@@ -154,8 +156,8 @@ def main():
     for k, v in before.items():
         if not k.endswith(f"/{DATASET}"):
             assert new[k] == v
-    NORMS.write_text(json.dumps(new, indent=2, sort_keys=True) + "\n")
-    print("norms:", {k: round(v, 4) for k, v in new.items() if k.endswith(f"/{DATASET}")}, "| other keys unchanged:",
+    SCALE_FILE.write_text(json.dumps(new, indent=2, sort_keys=True) + "\n")
+    print("scoring scale:", {k: round(v, 4) for k, v in new.items() if k.endswith(f"/{DATASET}")}, "| other keys unchanged:",
           len([k for k in new if not k.endswith(f'/{DATASET}')]))
 
 
