@@ -1,0 +1,34 @@
+[
+  {
+    "base": "claude-sonnet-5-5:dev+soft0.1",
+    "new": "ft-qwen:q36-3k-1e4+soft0.2",
+    "subset": "pop",
+    "base_score": 0.36135696300723236,
+    "new_score": 0.33819662597904,
+    "mcnemar_top1": {
+      "only_new": 132,
+      "only_base": 120,
+      "units": 754,
+      "p": 0.48842601828669646
+    },
+    "closer": {
+      "new_closer": 226,
+      "base_closer": 311,
+      "ties": 1,
+      "n_groups": 538,
+      "win_rate": 0.4208566108007449,
+      "p": 0.0002814979184347958
+    },
+    "bootstrap": {
+      "gap": -0.023160337028192365,
+      "ci_low": -0.07695537996410874,
+      "ci_high": 0.029557879995227344,
+      "ahead": 992,
+      "B": 5000,
+      "n_groups": 538,
+      "n_items": 754
+    },
+    "unpaired_ids": 0,
+    "significant": false
+  }
+]
