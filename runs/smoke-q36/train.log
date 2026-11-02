@@ -1,0 +1,31 @@
+2026-11-02 13:31:08,394 INFO RUN smoke-q36 base=accounts/fireworks/models/qwen3p6-35b-a3b data=data/train_sft_3k.jsonl rows=48 steps=6 lr=0.0001 epochs=1 bs=8 rank=16 sampler_every=3
+2026-11-02 13:31:08,794 INFO ServiceClient initialized for session ts-780a0c9237e744f3a5601c74df6b41cf
+2026-11-02 13:31:09,725 INFO Created model run-849b97f0eec44e4eacfcba74ec719ebe:train:0 (lora_rank=16)
+2026-11-02 13:31:09,879 INFO Auto-resolved account ID: dtheriot
+2026-11-02 13:31:09,879 INFO FiretitanTrainingClient session_id: 202c7c70
+2026-11-02 13:31:10,099 INFO Auto-resolved account ID: dtheriot
+2026-11-02 13:31:10,099 INFO Serverless training session ts-780a0c9237e744f3a5601c74df6b41cf, run run-849b97f0eec44e4eacfcba74ec719ebe. To continue from one of this run's checkpoints in a new process, pass init_from_checkpoint='dtheriot/run-849b97f0eec44e4eacfcba74ec719ebe/<checkpoint>' with the same log_path.
+2026-11-02 13:31:10,219 WARNING Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-11-02 13:31:12,237 INFO Auto-selected 4 render workers: cpu=11 (quota=0 affinity=0 host=11) max=16 tasks=48 cgroup=0.0/0.0 GiB host_available=0.0/0.0 GiB base=8.0 GiB reserve=8.0 GiB per_worker=10.0 GiB
+2026-11-02 13:31:12,238 INFO Dataset: 48 examples from data/train_sft_3k.jsonl (renderer=qwen3_5_disable_thinking, train_on_what=all_assistant_messages, workers=4, seed=0) -> ~6 batches/epoch x 1 epochs
+2026-11-02 13:31:13,312 INFO Starting at step 0 from base model (no checkpoint)
+2026-11-02 13:31:38,849 INFO Step 1/6 | Loss: 0.5246 | PPL: 1.69 | tok/s: 88 | tokens: 2208 | depth: 4
+2026-11-02 13:31:43,476 INFO Step 2/6 | Loss: 0.3658 | PPL: 1.44 | tok/s: 152 | tokens: 2307 | depth: 4
+2026-11-02 13:31:53,369 INFO Saving intermediate checkpoint at step 3 (dcp=False, sampler=True)
+2026-11-02 13:31:54,347 INFO Saving sampler checkpoint 'step-3'...
+2026-11-02 13:32:03,327 INFO Sampler checkpoint 'step-3' saved (9.0s)
+2026-11-02 13:32:04,349 INFO Sampler server-stored name 'run-849b97f0eec44e4eacfcba74ec719ebe-step-3-202c7c70' differs from caller name 'step-3'; using control-plane row for subsequent promotion.
+2026-11-02 13:32:04,350 INFO Step 3/6 | Loss: 0.3116 | PPL: 1.37 | tok/s: 171 | tokens: 2277 | depth: 4
+2026-11-02 13:32:07,132 INFO Step 4/6 | Loss: 0.3203 | PPL: 1.38 | tok/s: 176 | tokens: 2600 | depth: 4
+2026-11-02 13:32:17,920 INFO Step 5/6 | Loss: 0.3509 | PPL: 1.42 | tok/s: 184 | tokens: 2436 | depth: 4
+2026-11-02 13:32:19,747 INFO Saving intermediate checkpoint at step 6 (dcp=False, sampler=True)
+2026-11-02 13:32:20,752 INFO Saving sampler checkpoint 'step-6'...
+2026-11-02 13:32:28,088 INFO Sampler checkpoint 'step-6' saved (7.3s)
+2026-11-02 13:32:29,148 INFO Sampler server-stored name 'run-849b97f0eec44e4eacfcba74ec719ebe-step-6-202c7c70' differs from caller name 'step-6'; using control-plane row for subsequent promotion.
+2026-11-02 13:32:29,148 INFO Step 6/6 | Loss: 0.3329 | PPL: 1.39 | tok/s: 210 | tokens: 2057 | depth: 4
+2026-11-02 13:32:29,148 INFO Saving final checkpoint (step 6)...
+2026-11-02 13:32:29,150 INFO Saving DCP checkpoint 'step-6'...
+2026-11-02 13:32:38,062 INFO DCP checkpoint 'step-6' saved (8.9s)
+2026-11-02 13:32:56,281 INFO Sampler checkpoint 'step-6' already promotable on control plane — skipping redundant save.
+2026-11-02 13:32:56,282 INFO Training complete: 6 optimizer steps
+2026-11-02 13:32:57,545 INFO DONE {'steps': 6, 'job_id': 'ts-780a0c9237e744f3a5601c74df6b41cf'}

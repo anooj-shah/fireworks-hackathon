@@ -4,3 +4,5 @@ scikit-learn
 requests
 python-dotenv
 tqdm
+openai
+matplotlib

@@ -1,0 +1,84 @@
+{
+  "data": "data/dev.jsonl",
+  "rows": [
+    {
+      "predictor": "uniform guess",
+      "n": 1490,
+      "simbench_mean": -0.6610820039788637,
+      "simbench_median": 1.9494107940023042,
+      "simbench_pop": -1.4622709310276554,
+      "simbench_grouped": 0.15970121748144725,
+      "top_answer_match": 0.3483221476510067,
+      "worth_n_respondents_median": 2.0
+    },
+    {
+      "predictor": "dataset average (no AI)",
+      "n": 1490,
+      "simbench_mean": 17.943649422705548,
+      "simbench_median": 25.17431296268724,
+      "simbench_pop": 16.479374458903198,
+      "simbench_grouped": 19.443735458992197,
+      "top_answer_match": 0.39664429530201345,
+      "worth_n_respondents_median": 3.0
+    },
+    {
+      "predictor": "10 most similar training questions (no AI)",
+      "n": 1490,
+      "simbench_mean": 22.692986780462096,
+      "simbench_median": 29.060163280008915,
+      "simbench_pop": 19.56743361285597,
+      "simbench_grouped": 25.89498010705859,
+      "top_answer_match": 0.48523489932885905,
+      "worth_n_respondents_median": 5.0
+    },
+    {
+      "predictor": "TRUE answer, sharpened (power 2)",
+      "n": 1490,
+      "simbench_mean": 56.84240375078147,
+      "simbench_median": 58.72893177533717,
+      "simbench_pop": 53.87261042301335,
+      "simbench_grouped": 59.884827893630884,
+      "top_answer_match": 1.0,
+      "worth_n_respondents_median": 12.0
+    },
+    {
+      "predictor": "TRUE answer, sharpened (power 4)",
+      "n": 1490,
+      "simbench_mean": 19.367315334973718,
+      "simbench_median": 20.885525513490155,
+      "simbench_pop": 14.216152060172712,
+      "simbench_grouped": 24.644458146386704,
+      "top_answer_match": 1.0,
+      "worth_n_respondents_median": 3.0
+    },
+    {
+      "predictor": "TRUE top answer at 100% (max overconfidence)",
+      "n": 1490,
+      "simbench_mean": -30.567471499756948,
+      "simbench_median": -26.294657088966932,
+      "simbench_pop": -40.014846476951796,
+      "simbench_grouped": -20.889046591054615,
+      "top_answer_match": 1.0
+    }
+  ],
+  "per_dataset_knn": {
+    "DICES": 86.6,
+    "Jester": 58.1,
+    "OpinionQA": 50.1,
+    "OSPsychRWAS": 47.8,
+    "ESS": 33.1,
+    "LatinoBarometro": 32.4,
+    "Afrobarometer": 29.7,
+    "GlobalOpinionQA": 25.7,
+    "NumberGame": 9.9,
+    "MoralMachine": 6.8,
+    "ChaosNLI": 5.4,
+    "OSPsychMGKT": 1.0,
+    "TISP": -0.7,
+    "Choices13k": -2.6,
+    "OSPsychMACH": -9.3,
+    "WisdomOfCrowds": -9.9,
+    "ISSP": -13.7,
+    "OSPsychBig5": -15.4
+  }
+}

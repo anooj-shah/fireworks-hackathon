@@ -1,0 +1,68 @@
+{
+  "source": "HF pitehu/SimBench (SimBenchPop.csv, SimBenchGrouped.csv), CC BY-NC-SA 4.0",
+  "split_rule": "sha1(question text) bucket < 0.4 -> test; < 0.5 -> dev; else train; global across Pop+Grouped",
+  "test_rows": 5316,
+  "dev_rows": 1490,
+  "train_rows": 6704,
+  "test_questions": 2116,
+  "dev_questions": 542,
+  "train_questions": 2684,
+  "test_by_subset": {
+    "grouped": 2516,
+    "pop": 2800
+  },
+  "dev_by_subset": {
+    "grouped": 736,
+    "pop": 754
+  },
+  "train_by_subset": {
+    "grouped": 3091,
+    "pop": 3613
+  },
+  "test_by_dataset": {
+    "Afrobarometer": 607,
+    "ChaosNLI": 210,
+    "Choices13k": 186,
+    "ConspiracyCorr": 15,
+    "DICES": 194,
+    "ESS": 795,
+    "GlobalOpinionQA": 206,
+    "ISSP": 724,
+    "Jester": 53,
+    "LatinoBarometro": 727,
+    "MoralMachine": 186,
+    "MoralMachineClassic": 5,
+    "NumberGame": 207,
+    "OSPsychBig5": 90,
+    "OSPsychMACH": 20,
+    "OSPsychMGKT": 200,
+    "OSPsychRWAS": 7,
+    "OpinionQA": 649,
+    "TISP": 190,
+    "WisdomOfCrowds": 45
+  },
+  "train_by_dataset": {
+    "Afrobarometer": 1211,
+    "ChaosNLI": 241,
+    "Choices13k": 263,
+    "ConspiracyCorr": 30,
+    "DICES": 260,
+    "ESS": 1130,
+    "GlobalOpinionQA": 250,
+    "ISSP": 527,
+    "Jester": 67,
+    "LatinoBarometro": 894,
+    "MoralMachine": 260,
+    "MoralMachineClassic": 10,
+    "NumberGame": 240,
+    "OSPsychBig5": 130,
+    "OSPsychMACH": 50,
+    "OSPsychMGKT": 246,
+    "OSPsychRWAS": 14,
+    "OpinionQA": 584,
+    "TISP": 240,
+    "WisdomOfCrowds": 57
+  },
+  "question_overlap": 0,
+  "test_sha256": "e428a8decb1ed0507b56f8b00b4354c8e232bedc464d0059f82be868bacdba06"
+}
