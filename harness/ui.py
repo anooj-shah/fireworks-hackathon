@@ -1,24 +1,20 @@
 #!/usr/bin/env python3
-"""Crowdcast local web UI. Standard library only; serves http://127.0.0.1:8050
+"""Crowdcast local web UI: ask a group a multiple-choice question and see how it would split.
+Standard library only. Serves http://127.0.0.1:8050
 
   ../.venv/bin/python harness/ui.py            # then open http://127.0.0.1:8050
   ../.venv/bin/python harness/ui.py --port 9000
 
-Tab 1, "Held-out questions": REPLAYS the scored runs on the locked SimBench test set (no API calls).
-  Shows real people vs Crowdcast vs Claude Opus 5.5 vs the fine-tune alone vs the untrained base, with each
-  system's SimBench score on that row. This is exactly the evaluated system (crowdcast:test-v1).
-Tab 2, "Ask a new question": LIVE, through harness/cli.py predict() (same code as the CLI). Until the fine-tune is
-  deployed (eval/models.json -> fw-ft), it runs in partial mode (DeepSeek + survey memory) and says so on screen.
+Runs live through harness/cli.py predict() (same code as the CLI and the scored system). Until the fine-tune is
+deployed (eval/models.json -> fw-ft), it runs in preview mode (DeepSeek + survey memory) and says so on screen.
 """
 import argparse
 import json
-import random
-import re
 import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "eval"))
@@ -27,77 +23,7 @@ from tasks import simbench as T  # noqa: E402
 import crowdcast as C  # noqa: E402
 import cli  # noqa: E402
 
-REPLAY_RUNS = [  # (key, display name, run spec): the committed test runs
-    ("crowdcast", "Crowdcast (ours)", "crowdcast:test-v1"),
-    ("opus", "Claude Opus 5.5", "claude-opus-5-5:test"),
-    ("finetune", "Fine-tune alone", "ft-qwen:q36-3k-1e4-test"),
-    ("base", "Untrained Qwen", "qwen-base:test-base"),
-]
-OPT_RE = re.compile(r"^\(([A-Z])\):\s*(.*)$")
-
-
-def load_jsonl(p):
-    return [json.loads(l) for l in open(p) if l.strip()]
-
-
-def split_question(item):
-    q = item["question"]
-    stem, _, opts = q.partition("\n\nOptions:\n")
-    names = {}
-    for line in opts.splitlines():
-        m = OPT_RE.match(line.strip())
-        if m:
-            names[m.group(1)] = m.group(2)
-    return stem, [names.get(l, l) for l in item["labels"]]
-
-
-class Replay:
-    def __init__(self):
-        self.items = {it["id"]: it for it in load_jsonl(ROOT / "data" / "test.jsonl")}
-        self.runs = {}
-        for key, _, spec in REPLAY_RUNS:
-            row = C.find_summary_row(spec)
-            self.runs[key] = {r["id"]: r for r in load_jsonl(ROOT / row["results_file"])}
-        self.ids = sorted(self.items)
-        self.index = [(i, (self.items[i]["persona"] + " " + self.items[i]["question"]).lower()) for i in self.ids]
-        try:
-            self.demo = json.loads((ROOT / "results" / "simbench" / "demo_draw.json").read_text())["chosen"]
-        except Exception:
-            self.demo = None
-
-    def panel(self, iid):
-        it = self.items[iid]
-        stem, options = split_question(it)
-        systems = []
-        for key, name, spec in REPLAY_RUNS:
-            r = self.runs[key].get(iid)
-            if r is None:
-                continue
-            d = T.parse_dist(it, r.get("output")) if r.get("ok", True) else None
-            d = d or C.uniform(it["labels"])
-            systems.append({"key": key, "name": name, "run": spec, "dist": [d[l] for l in it["labels"]],
-                            "score": r.get("simbench", 100 * r.get("score", 0.0))})
-        cc = self.runs["crowdcast"].get(iid, {})
-        return {"id": iid, "subset": it["subset"], "dataset": it["dataset"], "persona": it["persona"], "stem": stem,
-                "labels": it["labels"], "options": options, "human": [it["human"][l] for l in it["labels"]],
-                "group_size": it.get("group_size"), "systems": systems, "ask_real_people": cc.get("ask_real_people")}
-
-    def search(self, q, subset, limit=60):
-        words = [w for w in q.lower().split() if w]
-        out = []
-        for iid, text in self.index:
-            if subset and not iid.startswith(subset + "-"):
-                continue
-            if all(w in text for w in words):
-                it = self.items[iid]
-                out.append({"id": iid, "dataset": it["dataset"], "persona": it["persona"][:90],
-                            "stem": split_question(it)[0][:140]})
-                if len(out) >= limit:
-                    break
-        return out
-
-
-STATE = {"replay": None, "system": None, "system_error": None}
+STATE = {"system": None, "system_error": None}
 LOCK = threading.Lock()
 
 
@@ -125,8 +51,6 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         u = urlparse(self.path)
-        qs = {k: v[0] for k, v in parse_qs(u.query).items()}
-        rp = STATE["replay"]
         try:
             if u.path == "/":
                 return self.send(200, PAGE, "text/html")
@@ -135,19 +59,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(200, {"live_ready": sysm is not None, "live_error": err,
                                        "partial": bool(sysm and sysm["partial"]),
                                        "weights": sysm["weights"] if sysm else None,
-                                       "o_model": sysm["o_cfg"]["model"] if sysm else None,
-                                       "demo": bool(rp.demo), "n_test": len(rp.ids)})
-            if u.path == "/api/search":
-                return self.send(200, rp.search(qs.get("q", ""), qs.get("subset", "")))
-            if u.path == "/api/replay":
-                ids = [i for i in qs.get("ids", "").split(",") if i in rp.items][:6]
-                return self.send(200, [rp.panel(i) for i in ids])
-            if u.path == "/api/random":
-                sub = qs.get("subset", "")
-                pool = [i for i in rp.ids if not sub or i.startswith(sub + "-")]
-                return self.send(200, [rp.panel(random.choice(pool))])
-            if u.path == "/api/demo":
-                return self.send(200, [rp.panel(i) for i in (rp.demo or {}).get("ids", []) if i in rp.items])
+                                       "o_model": sysm["o_cfg"]["model"] if sysm else None})
             return self.send(404, {"error": "not found"})
         except Exception as e:
             return self.send(500, {"error": str(e)})
@@ -176,121 +88,135 @@ PAGE = r"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><title>Crowdcast</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-:root{--ink:#16181d;--mute:#6b7280;--line:#e5e7eb;--bg:#fafaf9;--card:#fff;--acc:#2d5bff}
-*{box-sizing:border-box}body{margin:0;font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;color:var(--ink);background:var(--bg)}
-header{padding:18px 28px;border-bottom:1px solid var(--line);background:var(--card);display:flex;align-items:baseline;gap:16px}
-header h1{font-size:20px;margin:0;letter-spacing:-.01em}header .sub{color:var(--mute)}
-nav{display:flex;gap:4px;padding:0 28px;background:var(--card);border-bottom:1px solid var(--line)}
-nav button{border:0;background:none;padding:12px 14px;font:inherit;color:var(--mute);border-bottom:2px solid transparent;cursor:pointer}
-nav button.on{color:var(--ink);border-color:var(--acc);font-weight:600}
-main{padding:20px 28px;max-width:1280px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-input,textarea,select{font:inherit;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff}
-textarea{width:100%;resize:vertical}
-.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer;font:inherit}
-.btn.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
-.list{max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:#fff;margin-bottom:14px}
-.list div{padding:7px 10px;border-bottom:1px solid var(--line);cursor:pointer}.list div:hover{background:#f3f4f6}
-.list small{color:var(--mute)}
-.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(520px,1fr));gap:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
-.persona{font-weight:600}.stem{margin:6px 0 10px}.meta{color:var(--mute);font-size:12px}
-.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0 12px;font-size:12px}
-.legend span{display:inline-flex;align-items:center;gap:6px}.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
-.sys{display:grid;grid-template-columns:140px 1fr 64px;gap:10px;align-items:center;margin:6px 0}
-.sys .nm{font-size:13px}.sys .sc{text-align:right;font-variant-numeric:tabular-nums;font-size:13px}
-.stack{display:flex;height:22px;border-radius:5px;overflow:hidden;background:#f3f4f6}
-.stack div{height:100%;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:nowrap}
-.human .nm{font-weight:700}.ours .nm{font-weight:700;color:var(--acc)}
-.dots{display:grid;grid-template-columns:repeat(20,10px);gap:3px;margin-top:4px}.dots i{width:10px;height:10px;border-radius:50%}
-.crowds{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:12px}
-.crowds h4{margin:0 0 2px;font-size:12px;font-weight:600}
-.flag{display:inline-block;margin-top:10px;padding:3px 8px;border-radius:999px;font-size:12px}
-.flag.ask{background:#fff4e5;color:#9a5b00}.flag.ok{background:#e8f6ee;color:#1b6b3a}
-.banner{background:#fff4e5;border:1px solid #f5d39a;color:#7a4b00;border-radius:8px;padding:10px 12px;margin-bottom:12px}
-.note{color:var(--mute);font-size:12px;margin-top:8px}
-.ev{font-size:12px;color:var(--mute);margin-top:8px}
-.err{color:#b42318}
+:root{
+  --paper:#FAF9F5;--card:#FFFFFF;--sand:#F0EEE6;--line:#E8E6DC;--ink:#141413;--mute:#73726C;--clay:#D97757;--clay-d:#C15F3C;
+  --serif:"Copernicus","Tiempos Headline","Tiempos Text","Iowan Old Style","Charter","Georgia",serif;
+  --sans:"Styrene B","Söhne",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+.top{display:flex;align-items:center;gap:10px;padding:18px 28px}
+.mark{display:grid;grid-template-columns:repeat(3,5px);gap:2px}.mark i{width:5px;height:5px;border-radius:50%;background:var(--clay)}
+.mark i:nth-child(2n){opacity:.55}
+.brand{font:500 17px var(--serif);letter-spacing:-.01em}
+.wrap{max-width:960px;margin:0 auto;padding:8px 24px 80px}
+.hero{text-align:center;margin:28px 0 22px}
+.hero h1{font:400 40px/1.15 var(--serif);letter-spacing:-.02em;margin:0 0 8px}
+.hero p{color:var(--mute);margin:0}
+.seg{display:flex;justify-content:center;margin:0 0 22px}
+.seg div{display:inline-flex;background:var(--sand);border-radius:12px;padding:4px;gap:2px}
+.seg button{border:0;background:none;padding:7px 14px;border-radius:9px;cursor:pointer;color:var(--mute)}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(20,20,19,.08)}
+.composer{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px 16px;box-shadow:0 2px 10px rgba(20,20,19,.04)}
+.composer input,.composer textarea{width:100%;border:0;outline:0;background:transparent;resize:vertical;padding:4px 2px}
+.composer textarea{min-height:56px}
+.composer .lab{font-size:13px;color:var(--mute);margin:10px 0 2px}
+.composer .bar{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-top:10px}
+.cbar{display:flex;align-items:center;gap:8px}
+select{border:1px solid var(--line);background:var(--paper);border-radius:9px;padding:6px 8px}
+.send{border:0;background:var(--clay);color:#fff;border-radius:10px;padding:8px 14px;cursor:pointer;font-weight:500}
+.send:hover{background:var(--clay-d)}.send:disabled{opacity:.5;cursor:default}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0 18px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 13px;cursor:pointer;color:var(--ink)}
+.chip:hover{background:var(--sand)}
+.list{background:var(--card);border:1px solid var(--line);border-radius:14px;max-height:260px;overflow:auto;margin:-6px 0 18px}
+.list button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:10px 14px;cursor:pointer}
+.list button:hover{background:var(--paper)}.list button:last-child{border-bottom:0}
+.list small{display:block;color:var(--mute);font-size:12.5px;margin-top:2px}
+.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:16px;margin-top:18px}
+.big .stack{height:34px;border-radius:9px}.big .stack div{font-size:13px}
+details{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}summary{cursor:pointer;color:var(--mute);font-size:13.5px}
+details .rows{margin-top:12px}.addrow{display:flex;gap:8px;flex-wrap:wrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+.src{font-size:12.5px;color:var(--mute)}
+.who{font:500 19px/1.3 var(--serif);letter-spacing:-.01em;margin:4px 0 6px}
+.ask{margin:0 0 14px;color:#3D3D3A}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 14px;font-size:13px;color:#3D3D3A}
+.legend span{display:inline-flex;align-items:center;gap:6px}.sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+.rows{display:grid;grid-template-columns:128px 1fr 52px;gap:9px 12px;align-items:center}
+.rows .h{font-size:12px;color:var(--mute)}.rows .h.r{text-align:right}
+.nm{font-size:13.5px;color:#3D3D3A}.nm.human{font-weight:600;color:var(--ink)}
+.nm.ours{font-weight:600;color:var(--clay-d);display:flex;align-items:center;gap:6px}.nm.ours:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--clay)}
+.sc{text-align:right;font-variant-numeric:tabular-nums;font-size:13.5px}.sc.ours{color:var(--clay-d);font-weight:600}
+.stack{display:flex;height:24px;border-radius:7px;overflow:hidden;background:var(--sand)}
+.stack div{height:100%;font-size:11.5px;font-weight:500;display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:nowrap}
+.ourstack{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--clay)}
+.crowds{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.crowds h4{margin:0 0 6px;font:500 14px var(--serif)}.crowds h4.ours{color:var(--clay-d)}
+.dots{display:grid;grid-template-columns:repeat(20,8px);gap:3px}.dots i{width:8px;height:8px;border-radius:50%}
+.flag{display:inline-block;margin-top:16px;padding:5px 11px;border-radius:999px;font-size:13px}
+.flag.askp{background:#F6E6D2;color:#7A4A1E}.flag.ok{background:#E7ECDF;color:#46602F}
+.note{color:var(--mute);font-size:13px;text-align:center;max-width:640px;margin:22px auto 0}
+.banner{background:#F6E6D2;color:#6B4219;border-radius:14px;padding:12px 16px;margin:0 0 14px;font-size:14px}
+.ev{font-size:13px;color:var(--mute);margin-top:12px}
+.meta{font-size:13px;color:var(--mute);margin-top:10px}
+.err{color:#A63D2F;background:#F8E3DE;border-radius:12px;padding:10px 14px}
+.empty{color:var(--mute);text-align:center;padding:30px 0}
+@media (max-width:560px){.hero h1{font-size:30px}.panels{grid-template-columns:1fr}.rows{grid-template-columns:96px 1fr 44px}}
+@media (prefers-reduced-motion:no-preference){.card{animation:in .25s ease-out}@keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1}}}
 </style></head><body>
-<header><h1>Crowdcast</h1><span class="sub">a focus group in one second &middot; open models on Fireworks</span></header>
-<nav><button id="t1" class="on" onclick="tab(1)">Held-out questions (scored)</button><button id="t2" onclick="tab(2)">Ask a new question (live)</button></nav>
-<main>
-<section id="s1">
-  <div class="row">
-    <button class="btn pri" onclick="demo()">Rule-drawn demo question</button>
-    <button class="btn" onclick="rand('grouped')">Random demographic question</button>
-    <button class="btn" onclick="rand('pop')">Random population question</button>
-    <input id="q" placeholder="search the locked test set (e.g. adopt, trust, Kenya)" size="40" onkeydown="if(event.key==='Enter')search()">
-    <select id="sub"><option value="">all</option><option value="pop">population</option><option value="grouped">demographic</option></select>
-    <button class="btn" onclick="search()">Search</button>
-  </div>
-  <div id="list" class="list" style="display:none"></div>
-  <div id="p1" class="panels"></div>
-  <p class="note">Replay of the committed scored runs on the locked SimBench test set. No API calls. Score = official SimBench score on that row (100 = exactly the real split, 0 = no better than an even split). One row can't show a trend: use the proof card for claims (<code>results/simbench/prove__crowdcast__test-v1__test.md</code>).</p>
-</section>
-<section id="s2" style="display:none">
+<div class="top"><div class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span class="brand">Crowdcast</span></div>
+<div class="wrap">
+  <div class="hero"><h1>How would this group answer?</h1><p>Describe a group of people and ask a multiple-choice question. Crowdcast predicts how they would split, in about a second.</p></div>
   <div id="bnr"></div>
-  <label>Groups (one per line)</label>
-  <textarea id="groups" rows="3">The year is 2026. You are from the United States. You are in the 18-29 age group.
-The year is 2026. You are from the United States. You are in the 65+ age group.</textarea>
-  <div class="row" style="margin-top:10px"><input id="question" size="90" value="Would you pay $9.99 a month for an ad-free version of your favorite social media app?"></div>
-  <label>Options (one per line)</label>
-  <textarea id="options" rows="4">Definitely yes
-Probably yes
-Probably no
-Definitely no</textarea>
-  <div class="row" style="margin-top:10px"><button id="go" class="btn pri" onclick="predict()">Run Crowdcast</button><span id="st" class="meta"></span></div>
+  <div class="composer">
+    <div class="lab" style="margin-top:0">Question</div>
+    <input id="question" placeholder="Would you pay $9.99 a month for an ad-free version of your favorite social media app?">
+    <div class="lab">Answer options, one per line</div>
+    <textarea id="options" rows="4" placeholder="Definitely yes&#10;Probably yes&#10;Probably no&#10;Definitely no"></textarea>
+    <div class="lab">Who to ask, one group per line</div>
+    <textarea id="groups" rows="2" placeholder="The year is 2026. You are from the United States. You are in the 18-29 age group."></textarea>
+    <div class="bar"><span id="st" class="src"></span><button id="go" class="send" onclick="predict()">Ask the crowd</button></div>
+  </div>
+  <div class="chips" id="examples"></div>
   <div id="p2" class="panels"></div>
-</section>
-</main>
+  <p class="note">These are predictions, not polls. Use them to decide which questions are worth asking real people.</p>
+</div>
 <script>
-const COLORS=["#2d5bff","#f59e0b","#10b981","#ef4444","#8b5cf6","#06b6d4","#ec4899","#84cc16","#64748b","#a16207"];
-const col=i=>COLORS[i%COLORS.length];
+const PAL=[["#5B7FA6","#fff"],["#D4A27F","#3A2A1C"],["#788C5D","#fff"],["#B0624B","#fff"],["#8E7CB5","#fff"],["#4E8C86","#fff"],["#C9A85C","#3A2E12"],["#87867F","#fff"]];
+const col=i=>PAL[i%PAL.length][0],fg=i=>PAL[i%PAL.length][1];
 const el=(t,c,txt)=>{const e=document.createElement(t);if(c)e.className=c;if(txt!=null)e.textContent=txt;return e};
-function tab(n){for(const k of [1,2]){document.getElementById('s'+k).style.display=k===n?'':'none';document.getElementById('t'+k).className=k===n?'on':''}if(n===2)info()}
-function stack(dist){const s=el('div','stack');dist.forEach((p,i)=>{const d=el('div',null,p>=.08?Math.round(100*p)+'%':'');d.style.width=(100*p)+'%';d.style.background=col(i);d.title=Math.round(100*p)+'%';s.appendChild(d)});return s}
-function dots(dist){const g=el('div','dots');let counts=dist.map(p=>Math.floor(100*p)),rem=100-counts.reduce((a,b)=>a+b,0);
+const EXAMPLES=[
+ {label:"Ad-free subscription, young vs old",q:"Would you pay $9.99 a month for an ad-free version of your favorite social media app?",o:["Definitely yes","Probably yes","Probably no","Definitely no"],g:["The year is 2026. You are from the United States. You are in the 18-29 age group.","The year is 2026. You are from the United States. You are in the 65+ age group."]},
+ {label:"Four-day work week, two countries",q:"Would you support a law that makes the standard work week four days instead of five?",o:["Strongly support","Somewhat support","Somewhat oppose","Strongly oppose"],g:["The year is 2026. You are from Germany.","The year is 2026. You are from Japan."]},
+ {label:"Trust in AI answers, by education",q:"How much do you trust answers from AI chatbots?",o:["A great deal","Somewhat","Not much","Not at all"],g:["The year is 2026. You are from the United States. You have a college degree.","The year is 2026. You are from the United States. You did not finish high school."]}];
+function fill(x){document.getElementById('question').value=x.q;document.getElementById('options').value=x.o.join('\n');document.getElementById('groups').value=x.g.join('\n')}
+(function(){const E=document.getElementById('examples');EXAMPLES.forEach(x=>{const b=el('button','chip',x.label);b.onclick=()=>{fill(x);predict()};E.appendChild(b)});fill(EXAMPLES[0])})();
+function stack(dist,ours){const s=el('div','stack'+(ours?' ourstack':''));dist.forEach((p,i)=>{const d=el('div',null,p>=.09?Math.round(100*p)+'%':'');d.style.width=(100*p)+'%';d.style.background=col(i);d.style.color=fg(i);d.title=Math.round(100*p)+'%';s.appendChild(d)});return s}
+function dots(dist){const g=el('div','dots');const counts=dist.map(p=>Math.floor(100*p));const rem=100-counts.reduce((a,b)=>a+b,0);
  const order=dist.map((p,i)=>[100*p-Math.floor(100*p),i]).sort((a,b)=>b[0]-a[0]);for(let k=0;k<rem;k++)counts[order[k%order.length][1]]++;
  counts.forEach((c,i)=>{for(let k=0;k<c;k++){const d=el('i');d.style.background=col(i);g.appendChild(d)}});return g}
-function legend(labels,options){const L=el('div','legend');labels.forEach((l,i)=>{const s=el('span');const w=el('i','sw');w.style.background=col(i);s.appendChild(w);s.appendChild(document.createTextNode('('+l+') '+options[i]));L.appendChild(s)});return L}
-function sysRow(name,dist,score,cls){const r=el('div','sys '+(cls||''));r.appendChild(el('div','nm',name));r.appendChild(stack(dist));r.appendChild(el('div','sc',score==null?'':score.toFixed(1)));return r}
-function crowd(title,dist){const c=el('div');c.appendChild(el('h4',null,title));c.appendChild(dots(dist));return c}
-function replayCard(p){const c=el('div','card');
- c.appendChild(el('div','meta',p.dataset+' · '+p.id+(p.group_size?' · '+p.group_size+' real respondents':'')));
- c.appendChild(el('div','persona',p.persona));c.appendChild(el('div','stem',p.stem));c.appendChild(legend(p.labels,p.options));
- const h=el('div','sys');h.appendChild(el('div','meta',''));h.appendChild(el('div','meta',''));h.appendChild(el('div','meta','score'));c.appendChild(h);
- c.appendChild(sysRow('Real people',p.human,null,'human'));
- p.systems.forEach(s=>c.appendChild(sysRow(s.name,s.dist,s.score,s.key==='crowdcast'?'ours':'')));
- const cr=el('div','crowds');cr.appendChild(crowd('100 real people',p.human));
- const ours=p.systems.find(s=>s.key==='crowdcast'),op=p.systems.find(s=>s.key==='opus');
- if(ours)cr.appendChild(crowd('Crowdcast',ours.dist));if(op)cr.appendChild(crowd('Claude Opus 5.5',op.dist));c.appendChild(cr);
- if(p.ask_real_people!=null){const f=el('span','flag '+(p.ask_real_people?'ask':'ok'),p.ask_real_people?'Ask real people: our two models disagree':'Our two models agree');c.appendChild(f)}
- return c}
-async function show(url){const r=await fetch(url);const d=await r.json();const P=document.getElementById('p1');P.innerHTML='';if(d.error){P.appendChild(el('div','err',d.error));return}d.forEach(p=>P.appendChild(replayCard(p)))}
-function demo(){document.getElementById('list').style.display='none';show('/api/demo')}
-function rand(s){document.getElementById('list').style.display='none';show('/api/random?subset='+s)}
-async function search(){const q=document.getElementById('q').value,s=document.getElementById('sub').value;const r=await fetch('/api/search?q='+encodeURIComponent(q)+'&subset='+s);const d=await r.json();
- const L=document.getElementById('list');L.innerHTML='';L.style.display='';if(!d.length){L.appendChild(el('div','meta','no matches'));return}
- d.forEach(x=>{const row=el('div');row.appendChild(el('div',null,x.stem));row.appendChild(el('small',null,x.dataset+' · '+x.persona));row.onclick=()=>show('/api/replay?ids='+x.id);L.appendChild(row)})}
-let INFO=null;async function info(){if(INFO)return;const r=await fetch('/api/info');INFO=await r.json();const B=document.getElementById('bnr');B.innerHTML='';
- if(!INFO.live_ready){B.appendChild(el('div','banner','Live mode unavailable: '+INFO.live_error));document.getElementById('go').disabled=true;return}
- if(INFO.partial)B.appendChild(el('div','banner','Partial mode: the fine-tune is not deployed yet, so this runs DeepSeek V4.1 Flash + survey memory only ('+Object.entries(INFO.weights).map(([k,v])=>k+' '+v.toFixed(2)).join(', ')+'). This is NOT the system scored on the test set. Deploy the fine-tune and set fw-ft in eval/models.json for the full harness.'))}
-async function predict(){const btn=document.getElementById('go'),st=document.getElementById('st'),P=document.getElementById('p2');btn.disabled=true;st.textContent='running…';P.innerHTML='';
+function legend(options){const L=el('div','legend');options.forEach((o,i)=>{const s=el('span');const w=el('i','sw');w.style.background=col(i);s.appendChild(w);s.appendChild(document.createTextNode(o));L.appendChild(s)});return L}
+function rows(list){const R=el('div','rows');list.forEach(x=>{R.appendChild(el('div','nm',x.name));R.appendChild(stack(x.dist,false));R.appendChild(el('div','sc',''))});return R}
+let INFO=null;async function info(){try{const r=await fetch('/api/info');INFO=await r.json()}catch(e){return}const B=document.getElementById('bnr');B.innerHTML='';
+ if(!INFO.live_ready){B.appendChild(el('div','banner','Crowdcast can\'t answer yet: '+INFO.live_error));document.getElementById('go').disabled=true;return}
+ if(INFO.partial)B.appendChild(el('div','banner','Preview mode: our fine-tuned model isn\'t deployed yet, so answers come from DeepSeek V4.1 Flash plus the survey memory. The full version adds the fine-tune.'))}
+info();
+async function predict(){const btn=document.getElementById('go'),st=document.getElementById('st'),P=document.getElementById('p2');
  const body={groups:document.getElementById('groups').value.split('\n'),question:document.getElementById('question').value,options:document.getElementById('options').value.split('\n')};
+ if(!body.question.trim()){st.textContent='Write a question first.';return}
+ if(body.options.filter(x=>x.trim()).length<2){st.textContent='Add at least two answer options.';return}
+ if(!body.groups.filter(x=>x.trim()).length){st.textContent='Describe at least one group.';return}
+ btn.disabled=true;st.textContent='Asking the crowd…';P.innerHTML='';
  try{const r=await fetch('/api/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();
-  if(d.error){P.appendChild(el('div','err',d.error));return}
-  const opts=d.options;st.textContent=(d.meta.partial_run?'partial mode · ':'')+'weights '+Object.entries(d.meta.weights_used).map(([k,v])=>k+' '+v.toFixed(2)).join(', ');
-  d.results.forEach(g=>{const c=el('div','card');c.appendChild(el('div','persona',g.group));c.appendChild(legend(d.labels,opts));
-   c.appendChild(sysRow('Crowdcast',d.labels.map(l=>g.prediction[l]),null,'ours'));
-   const names={F:'Fine-tune',O:'DeepSeek V4.1 Flash',M:'Survey memory'};
-   for(const k of ['F','O','M']){if(k in g.members&&g.members[k])c.appendChild(sysRow(names[k],d.labels.map(l=>g.members[k][l]),null))}
-   const cr=el('div','crowds');cr.appendChild(crowd('100 simulated respondents',d.labels.map(l=>g.prediction[l])));c.appendChild(cr);
-   if(g.ask_real_people!=null)c.appendChild(el('span','flag '+(g.ask_real_people?'ask':'ok'),g.ask_real_people?'Ask real people: the models disagree':'Models agree'));
-   c.appendChild(el('div','meta',g.latency_s.toFixed(2)+' s'+(g.cost_usd!=null?' · $'+g.cost_usd.toFixed(5):'')));
-   for(const [k,e] of Object.entries(g.member_errors||{}))c.appendChild(el('div','err','member '+k+' failed (counted as an even split): '+e));
-   if(g.evidence&&g.evidence.length){const e=g.evidence[0];c.appendChild(el('div','ev','Closest past survey question (similarity '+e.similarity+'): '+e.question))}
-   P.appendChild(c)})}
- catch(e){P.appendChild(el('div','err',String(e)))}finally{btn.disabled=false}}
+  if(d.error){P.appendChild(el('div','err',d.error));st.textContent='';return}
+  st.textContent='';const names={F:'Our fine-tune',O:'DeepSeek V4.1 Flash',M:'Similar past surveys'};
+  d.results.forEach(g=>{const c=el('div','card');c.appendChild(el('div','who',g.group));c.appendChild(legend(d.options));
+   const dist=d.labels.map(l=>g.prediction[l]);const big=el('div','big');big.appendChild(stack(dist,false));c.appendChild(big);
+   const cr=el('div','crowds');cr.appendChild(crowd('If you asked 100 of them',dist));c.appendChild(cr);
+   if(g.ask_real_people!=null)c.appendChild(el('span','flag '+(g.ask_real_people?'askp':'ok'),g.ask_real_people?'Worth asking real people: the models disagree':'The models agree on this one'));
+   c.appendChild(el('div','meta','Answered in '+g.latency_s.toFixed(1)+' s'+(g.cost_usd!=null?' for $'+g.cost_usd.toFixed(5):'')));
+   for(const [k,e] of Object.entries(g.member_errors||{}))c.appendChild(el('div','err',names[k]+' didn\'t answer, so it counts as an even split: '+e));
+   const det=el('details');det.appendChild(el('summary',null,'How this was computed'));
+   const list=[];for(const k of ['F','O','M']){if(g.members[k])list.push({name:names[k],dist:d.labels.map(l=>g.members[k][l])})}
+   det.appendChild(rows(list));det.appendChild(el('div','ev','Blend weights: '+Object.entries(d.meta.weights_used).filter(([k,v])=>v>0).map(([k,v])=>(names[k]||k)+' '+Math.round(100*v)+'%').join(', ')));
+   if(g.evidence&&g.evidence.length)det.appendChild(el('div','ev','Closest past survey question: '+g.evidence[0].question));
+   c.appendChild(det);P.appendChild(c)})}
+ catch(e){P.appendChild(el('div','err','Could not reach the local server: '+e));st.textContent=''}finally{btn.disabled=false}}
+function crowd(title,dist){const c=el('div');c.appendChild(el('h4',null,title));c.appendChild(dots(dist));return c}
+if(location.hash==='#run')predict();
 </script></body></html>"""
 
 
@@ -298,8 +224,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", type=int, default=8050)
     a = ap.parse_args()
-    print("loading the scored test runs ...")
-    STATE["replay"] = Replay()
+    print("loading the survey memory and model settings ...")
+    get_system()
     srv = ThreadingHTTPServer(("127.0.0.1", a.port), Handler)
     print(f"Crowdcast UI on http://127.0.0.1:{a.port}  (Ctrl-C to stop)")
     srv.serve_forever()
