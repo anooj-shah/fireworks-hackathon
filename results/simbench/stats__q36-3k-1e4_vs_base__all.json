@@ -1,0 +1,34 @@
+[
+  {
+    "base": "qwen-base:dev-base",
+    "new": "ft-qwen:q36-3k-1e4",
+    "subset": "all",
+    "base_score": 0.1757739179114005,
+    "new_score": 0.39743763672457216,
+    "mcnemar_top1": {
+      "only_new": 365,
+      "only_base": 213,
+      "units": 1490,
+      "p": 2.6759443922597854e-10
+    },
+    "closer": {
+      "new_closer": 321,
+      "base_closer": 189,
+      "ties": 32,
+      "n_groups": 542,
+      "win_rate": 0.6294117647058823,
+      "p": 5.4607474640780745e-09
+    },
+    "bootstrap": {
+      "gap": 0.22166371881317162,
+      "ci_low": 0.11217559304260535,
+      "ci_high": 0.3341787193678323,
+      "ahead": 4999,
+      "B": 5000,
+      "n_groups": 542,
+      "n_items": 1490
+    },
+    "unpaired_ids": 0,
+    "significant": true
+  }
+]

@@ -9,9 +9,9 @@ Add a row **before** you launch, then commit and push. The same base model is fi
 
 | Person | Run name (≤17 chars) | Base model | Training data | LR / epochs / batch / LoRA rank / other | Status |
 |---|---|---|---|---|---|
-| Dylan | `q36-3k-1e4` | Qwen 3.6 35B A3B | `train_sft_3k.jsonl` (mixed 3k) | 1e-4 / 1 / 16 / 16 | trained 13:46, not scored yet |
-| Dylan | `q36-poph-1e4` | Qwen 3.6 35B A3B | `train_sft_poph3k.jsonl` (Pop + Grouped capped 10/question) | 1e-4 / 1 / 16 / 16 | launching 14:08 |
-| Dylan | `q36-pop-1e4` | Qwen 3.6 35B A3B | `train_sft_pop3k.jsonl` (Pop only 3k) | 1e-4 / 1 / 16 / 16 | launching 14:08 |
+| Dylan | `q36-3k-1e4` | Qwen 3.6 35B A3B | `train_sft_3k.jsonl` (mixed 3k) | 1e-4 / 1 / 16 / 16 | scored 14:18: dev Pop 30.4 (base 10.1), report `experiments/q36-3k-1e4.md` |
+| Dylan | `q36-poph-1e4` | Qwen 3.6 35B A3B | `train_sft_poph3k.jsonl` (Pop + Grouped capped 10/question) | 1e-4 / 1 / 16 / 16 | training (launched 14:08, ETA ~14:35) |
+| Dylan | `q36-pop-1e4` | Qwen 3.6 35B A3B | `train_sft_pop3k.jsonl` (Pop only 3k) | 1e-4 / 1 / 16 / 16 | training (launched 14:08, ETA ~14:35) |
 
 **Base models available for serverless training** (IDs are verified, or come from `docs/fireworks-reference.md` §3):
 | Base | Fireworks ID | Key in `train/common.py` |
@@ -50,10 +50,12 @@ Setup (once): see the README "Training setup" line (cookbook + `.venv-train`, Py
 # 2. Train (name <=17 chars, start with your initials: dy-q36-pop-1e4)
 .venv-train/bin/python train/train_sft.py --name <run> --base <key> --data data/train_sft_3k.jsonl --lr 1e-4
 
-# 3. Score the fine-tuned checkpoint on all of dev
-#    model path = accounts/<your-account>/trainingSessions/<ts-id>/checkpoints/<server-stored name>
-#    (both ids are printed in runs/<run>/train.log)
-.venv-train/bin/python train/sample_eval.py --base <key> --model-path <path> --data data/dev.jsonl --label <run>-s<step>
+# 3. Score the fine-tuned run on all of dev, after training finishes. Use --from-checkpoint with the
+#    trainer-side ref printed in runs/<run>/train.log ("init_from_checkpoint='<account>/<run-id>/<ckpt>'").
+#    The final step is step-<total steps> (e.g. step-188 for 3k rows at batch 16). It loads that checkpoint
+#    into a fresh LoRA session, samples, then closes the session. (--model-path returns 400 "Invalid
+#    serverless training model" from a separate process, so don't use it.) Use -c 48: all of dev takes ~70 s.
+.venv-train/bin/python train/sample_eval.py --base <key> --from-checkpoint <account>/<run-id>/step-<N> --data data/dev.jsonl --label <run> -c 48
 ```
 
 Each scoring run writes a per-question file `results/simbench/<model>__<label>__<time>.jsonl` and appends one summary row to `results/simbench/summary.jsonl`. Commit both. (`summary.jsonl` uses git's union merge, so appends from different people don't conflict.)
