@@ -1,0 +1,26 @@
+{
+ "run": "crowdcast:twin2k-v1",
+ "live_members": {},
+ "inputs_ok": true,
+ "weights": {
+  "F": 0.4,
+  "O": 0.4,
+  "M": 0.2,
+  "U": 0.0
+ },
+ "committed": {
+  "pop": 38.713879664269356,
+  "grouped": 32.78906577438171,
+  "all": 35.36032584532578
+ },
+ "reproduced": {
+  "pop": 38.713879664269356,
+  "grouped": 32.78906577438171,
+  "all": 35.36032584532578
+ },
+ "n_items": 977,
+ "max_item_diff": 5.684341886080802e-14,
+ "max_regrade_diff_of_committed_output_text": 4.737038580060471e-06,
+ "reproduced_exactly": true,
+ "verdict": "REPRODUCED EXACTLY: crowdcast:twin2k-v1 pop 38.7139 / grouped 32.7891 / all 35.3603"
+}

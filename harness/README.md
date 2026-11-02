@@ -12,7 +12,32 @@ group + question + options
        + trust flag: if F and O disagree by more than the dev median → "ask real people about this one"
 ```
 
-## Results on dev (practice set; test not run yet)
+## Results on held-out sets (frozen dev weights, no re-tuning; run 15:13–15:16)
+SimBench score (100 = matches real people, 0 = no better than an even split). Opus = saved runs, not re-run.
+
+| Set | Untrained Qwen | Fine-tuned Qwen | DeepSeek alone | **Crowdcast** | Claude Opus 5.5 |
+|---|---|---|---|---|---|
+| SimBench test, Pop (2,111 questions, headline) | 12.2 | 34.7 | 35.7 | **46.0** | 44.7 |
+| SimBench test, all (2,116 questions) | 12.6 | 41.6 | 42.0 | **49.3** | 55.1 |
+| Twin-2K (977 rows, 424 questions) | 7.8 | 20.2 | 34.1 | **35.4** | not run |
+| SF ballot (19 measures, 228 rows) | 2.5 | 25.5 | 31.1 | 28.1 | 23.0 |
+
+- **SimBench test vs Opus** (`results/simbench/prove__crowdcast__test-v1__test.md`):
+  - Pop: +1.2 points (95% range −1.1 to +3.6), but Opus is closer on more questions (1,149 vs 962, p = 5e-5). **"Can't be told apart"**, at **18× lower cost** ($0.258 vs $4.69 per 1k).
+  - Demographic (Grouped) half: **real loss**, −13.7.
+  - Overall: **real loss**, −5.8.
+- **Crowdcast vs its own parts** (cluster bootstrap + closer-to-real-people test):
+  - SimBench test: **real gain** over the fine-tune (+11.2 Pop) and over DeepSeek alone (+10.2 Pop).
+  - Twin-2K: **real gain** over the fine-tune (+15.2). Over DeepSeek alone: +4.7 on Pop is real, +1.3 overall can't be told apart.
+  - SF ballot (19 measures): can't be told apart from anything. Too few questions.
+- **Untuned DeepSeek alone matches or beats our fine-tune on every set.** Most of the harness gain comes from combining the two plus memory.
+- **Trust flag:**
+  - Holds on SimBench test (trusted 54.3 vs flagged 37.7, ρ = 0.34).
+  - Weak on Twin-2K (ρ = 0.12).
+  - **Fails on SF** (flagged questions scored higher).
+- All three reproduce exactly: `harness/reproduce.py --run crowdcast:test-v1` (or `twin2k-v1`, `sfballot-v1`).
+
+## Results on dev (practice set; weights fit here)
 | System | Dev Pop | Dev Grouped | Dev all | $ / 1k answers | Source |
 |---|---|---|---|---|---|
 | **Crowdcast** (F+O+M) | **41.1** | 54.4 | 47.7 | **0.257** | `results/simbench/crowdcast_fit__v1.json` |

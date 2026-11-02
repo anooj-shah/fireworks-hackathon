@@ -46,14 +46,7 @@ def load_jsonl(p):
 
 
 def summary_row(spec):
-    model, label = spec.split(":", 1)
-    row = None
-    for r in load_jsonl(RES / "summary.jsonl"):
-        if r["model"] == model and r["label"] == label:
-            row = r
-    if row is None:
-        raise SystemExit(f"no summary row for {spec}")
-    return row
+    return C.find_summary_row(spec)
 
 
 def check(name, got, want):
@@ -165,7 +158,7 @@ def main():
         out["reproduced_exactly"] = exact
     out["verdict"] = verdict
     model, label = a.run.split(":", 1)
-    path = RES / f"reproduce__{model}__{label}{'__live' if live else ''}.json"
+    path = C.results_dir_for(prov["data"]) / f"reproduce__{model}__{label}{'__live' if live else ''}.json"
     path.write_text(json.dumps(out, indent=1))
     print(f"\n{verdict}\nwrote {path.relative_to(ROOT)}")
     if not live and not out["reproduced_exactly"]:

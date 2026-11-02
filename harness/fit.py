@@ -53,13 +53,7 @@ def load_jsonl(p):
 
 
 def load_run(spec):
-    model, label = spec.split(":", 1)
-    row = None
-    for r in load_jsonl(RES / "summary.jsonl"):
-        if r["model"] == model and r["label"] == label:
-            row = r
-    if row is None:
-        raise SystemExit(f"no summary row for {spec}")
+    row = C.find_summary_row(spec)
     return {r["id"]: r for r in load_jsonl(ROOT / row["results_file"])}, row
 
 
@@ -202,7 +196,8 @@ def write_run(sp, w, members, label, harness_meta, dis=None, flag=None):
     s, tvd = sp.scores(mix)
     used = [k for k in ("F", "O") if w.get(k) and k in members]
     lat = np.max(np.stack([members[k]["lat"] for k in used]), axis=0) if used else np.zeros(len(sp.ids))
-    out = RES / f"crowdcast__{label}__{datetime.now().strftime('%H%M%S')}.jsonl"
+    res = C.results_dir_for(sp.path)
+    out = res / f"crowdcast__{label}__{datetime.now().strftime('%H%M%S')}.jsonl"
     recs = []
     with open(out, "w") as f:
         for i, it in enumerate(sp.items):
@@ -236,7 +231,7 @@ def write_run(sp, w, members, label, harness_meta, dis=None, flag=None):
         "harness": harness_meta, "provenance": provenance(sp, w, members),
         "results_file": str(out.relative_to(ROOT)),
     }
-    with open(RES / "summary.jsonl", "a") as f:
+    with open(res / "summary.jsonl", "a") as f:
         f.write(json.dumps(summ) + "\n")
     print(f"  wrote {summ['results_file']}  crowdcast:{label}  pop {summ.get('m_simbench_pop'):.2f}  "
           f"grouped {summ.get('m_simbench_grouped'):.2f}  all {summ['m_simbench']:.2f}  "
@@ -328,7 +323,7 @@ def do_apply(a, sp):
     w = ch["weights"]
     s, tvd = sp.scores(mix_of({"F": F["A"], "O": O["A"], "M": sp.M, "U": sp.U}, w))
     tr, dis, flag = trust(sp, F, O, s, tvd, thr=ch["trust_threshold"])
-    split = Path(sp.path).stem
+    split = C.split_name(sp.path)
     meta = {**ch, "applied_to": sp.path, "F_run": a.f, "O_run": a.o[0], "fit_file": a.apply, "trust_on_this_split": tr}
     write_run(sp, w, {"F": F, "O": O}, f"{split}-{fit['label']}", meta, dis, flag)
     for k in ("pop", "all"):

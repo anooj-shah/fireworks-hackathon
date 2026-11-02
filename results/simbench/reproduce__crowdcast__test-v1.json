@@ -1,0 +1,26 @@
+{
+ "run": "crowdcast:test-v1",
+ "live_members": {},
+ "inputs_ok": true,
+ "weights": {
+  "F": 0.4,
+  "O": 0.4,
+  "M": 0.2,
+  "U": 0.0
+ },
+ "committed": {
+  "pop": 45.95664540785495,
+  "grouped": 52.961650049145895,
+  "all": 49.27203135170145
+ },
+ "reproduced": {
+  "pop": 45.95664540785495,
+  "grouped": 52.961650049145895,
+  "all": 49.27203135170145
+ },
+ "n_items": 5316,
+ "max_item_diff": 1.1368683772161603e-13,
+ "max_regrade_diff_of_committed_output_text": 4.6962024882191145e-06,
+ "reproduced_exactly": true,
+ "verdict": "REPRODUCED EXACTLY: crowdcast:test-v1 pop 45.9566 / grouped 52.9617 / all 49.2720"
+}

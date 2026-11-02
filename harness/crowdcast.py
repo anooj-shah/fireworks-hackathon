@@ -24,6 +24,43 @@ TOK = re.compile(r"[a-z0-9]+")
 MEMBERS = ("F", "O", "M", "U")
 
 
+RESULT_DIRS = ("simbench", "twin2k", "sfballot", "polls2026")
+EXT_NAMES = {"data/ext_twin2k.jsonl": "twin2k", "data/ext_sfballot.jsonl": "sfballot", "data/ext_polls2026.jsonl": "polls2026"}
+
+
+def results_dir_for(data_path):
+    """Where runs on this data file are filed (outside test sets live in results/<name>/, see eval/move_ext_results.py)."""
+    return ROOT / "results" / EXT_NAMES.get(Path(data_path).as_posix(), "simbench")
+
+
+def split_name(data_path):
+    """Label prefix for a data file: dev / test / twin2k / sfballot / polls2026."""
+    return EXT_NAMES.get(Path(data_path).as_posix(), Path(data_path).stem)
+
+
+def find_summary_row(spec):
+    """Latest summary row for <model>:<label>, searched across every results/<set>/summary.jsonl."""
+    model, label = spec.split(":", 1)
+    found = []
+    for d in RESULT_DIRS:
+        f = ROOT / "results" / d / "summary.jsonl"
+        if not f.exists():
+            continue
+        row = None
+        for line in open(f):
+            if line.strip():
+                r = json.loads(line)
+                if r.get("model") == model and r.get("label") == label:
+                    row = r
+        if row:
+            found.append(row)
+    if not found:
+        raise SystemExit(f"no summary row for {spec} in results/*/summary.jsonl")
+    if len(found) > 1:
+        raise SystemExit(f"{spec} appears in more than one results folder; be specific")
+    return found[0]
+
+
 def uniform(labels):
     return {l: 1.0 / len(labels) for l in labels}
 
