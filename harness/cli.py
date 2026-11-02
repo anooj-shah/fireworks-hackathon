@@ -73,6 +73,8 @@ def main():
     weights = dict(ch["weights"])
     reg = registry()
     o_cfg = reg[ch["o_model_key"]]
+    if not os.environ.get(o_cfg["api_key_env"]):
+        sys.exit(f"{o_cfg['api_key_env']} is not set: put it in {ROOT / '.env'} (see .env.example)")
     f_cfg = reg.get(a.f_model)
     f_ok = bool(f_cfg) and "FILL" not in f_cfg.get("model", "FILL")
     partial = False
