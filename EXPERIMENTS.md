@@ -1,21 +1,26 @@
 # Team experiment protocol (read before training anything)
 
-**The plan:** everyone runs **the same eval**. Each person fine-tunes a **different base model** on Fireworks, on their own account, and compares it to **that same model untrained**. Everyone writes one report per experiment in the same format (`experiments/_TEMPLATE.md`). The team then compares the reports side by side and picks the winner(s).
+**The plan:** everyone runs **the same eval**. Each person fine-tunes models on Fireworks, on their own account. **Several people can use the same base model** as long as their settings differ (data mix, learning rate, epochs, LoRA rank…). Every fine-tune is compared to **that same base model untrained**. Everyone writes one report per experiment in the same format (`experiments/_TEMPLATE.md`). The team then compares the reports side by side and picks the winner(s).
 
 If you're an agent: follow this file exactly. Don't change the eval, the data split or the report format. If something here blocks you, tell your human instead of working around it.
 
-## 1. Claim a base model (so two people don't train the same thing)
-Add your row here, commit, and push **before** you launch.
+## 1. Claim your experiment (so nobody trains the exact same thing twice)
+Add a row **before** you launch, then commit and push. The same base model is fine; just change at least one setting from every existing row with that base.
 
-| Person | Base model (Fireworks ID) | Status |
+| Person | Run name (≤17 chars) | Base model | Training data | LR / epochs / batch / LoRA rank / other | Status |
+|---|---|---|---|---|---|
+| Dylan | `q36-3k-1e4` | Qwen 3.6 35B A3B | `train_sft_3k.jsonl` (mixed 3k) | 1e-4 / 1 / 16 / 16 | trained 13:46, not scored yet |
+
+**Base models available for serverless training** (IDs are verified, or come from `docs/fireworks-reference.md` §3):
+| Base | Fireworks ID | Key in `train/common.py` |
 |---|---|---|
-| Dylan | Qwen 3.6 35B A3B (`accounts/fireworks/models/qwen3p6-35b-a3b`) | 1 run trained (`q36-3k-1e4`, mixed 3k, lr 1e-4), not scored yet |
-| _open_ | NVIDIA Nemotron 3.5 Super VL 120B (`accounts/fireworks/models/nvidia-nemotron-3p5-super-vl-120b-a12b-bf16`; NVIDIA prize) | |
-| _open_ | Qwen 3.8 27B (`accounts/fireworks/models/qwen3p8-27b`) | |
-| _open_ | GLM 5.3 Flash (`accounts/fireworks/models/glm-5p3-flash`) | |
-| _open_ | Muse Glimmer 30B, DeepSeek V4.1 Flash, other serverless-training bases (see `docs/fireworks-reference.md` §3) | |
+| Qwen 3.6 35B A3B (cheapest) | `accounts/fireworks/models/qwen3p6-35b-a3b` | `qwen` |
+| NVIDIA Nemotron 3.5 Super VL 120B (NVIDIA prize) | `accounts/fireworks/models/nvidia-nemotron-3p5-super-vl-120b-a12b-bf16` | `nem` |
+| Qwen 3.8 27B | `accounts/fireworks/models/qwen3p8-27b` | add it |
+| GLM 5.3 Flash | `accounts/fireworks/models/glm-5p3-flash` | add it |
+| Others (Muse Glimmer 30B, DeepSeek V4.1 Flash…) | see `docs/fireworks-reference.md` §3 | add it |
 
-Within your model you can try several variants (data mix, learning rate, epochs). Each variant gets its own report.
+**Untrained baselines are shared.** Each base model's untrained score only needs to be measured once, with the exact settings below. If a committed `results/simbench/<base>-base__...` file on all of dev already exists for your base, reuse it in your report instead of re-scoring.
 
 ## 2. What stays the same for everyone (non-negotiable)
 | Thing | Fixed value |
