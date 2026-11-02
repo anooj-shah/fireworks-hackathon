@@ -12,6 +12,10 @@
   "closed-azure": {"base_url": "https://FILL_RESOURCE.openai.azure.com/openai/v1/", "api_key_env": "AZURE_OPENAI_API_KEY",
                    "model": "FILL_DEPLOYMENT", "price_in": null, "price_out": null, "closed": true, "params": {}},
 
+  "qwen3-4b": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
+              "model": "accounts/alexxandriayip-mb1bl/deployments/wcgxgscb", "price_in": 0.1, "price_out": 0.1,
+              "closed": false, "params": {"temperature": 0}},
+
   "fw-small": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
                "model": "accounts/fireworks/models/FILL_ME", "price_in": null, "price_out": null, "params": {"temperature": 0}},
   "fw-large": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
