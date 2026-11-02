@@ -1,6 +1,6 @@
 # frontier-claude (frontier baseline: Claude Opus / Sonnet / Haiku 5.5)
 
-**Owner:** Dylan · **Date/time:** 14:25 · **Status:** scored on dev; test running
+**Owner:** Dylan · **Date/time:** 14:25 · **Status:** scored on dev and test
 
 Not a fine-tune. This is the **required frontier closed-model baseline**, scored with `eval/run.py` through Anthropic's native Messages API.
 
@@ -27,8 +27,14 @@ Latency is through Anthropic's public API at concurrency 32 (streamed, wall-cloc
 
 **Best fine-tune so far vs Opus on dev Pop** (`eval/stats.py --base claude-opus-5-5:dev --new ft-qwen:q36-3k-1e4 --subset pop`, saved as `results/simbench/stats__q36-3k-1e4_vs_opus__pop.json`): `q36-3k-1e4` scores 0.304 vs Opus 0.425. Gap **−0.121**, 95% CI [−0.185, −0.058]. Closer to real people on 223 vs 310 questions (p = 0.0002). Verdict: **real loss**. The fine-tune is far cheaper: $0.156 vs $4.81 per 1k answers, per the two summary rows.
 
-## Results on test
-Pending. Running Opus / Sonnet / Haiku once on all of `data/test.jsonl` (team approved; the frontier model is one of the three test-set systems in `EXPERIMENTS.md` §5).
+## Results on test (`data/test.jsonl`, all 5,316 rows, run once at 14:24)
+| System | Test Pop | Test Grouped | Test overall | Top-answer match | Parse OK | p50 latency | Output tokens / answer | $ / 1k answers | Results file |
+|---|---|---|---|---|---|---|---|---|---|
+| Claude Opus 5.5 (high) | **44.72** | 66.69 | 55.12 | 74.5% | 99.98% (1 unparsed) | 2.34 s | 165 | $4.69 | `results/simbench/claude-opus-5-5__test__142414.jsonl` |
+| Claude Sonnet 5.5 (high) | 37.38 | 57.63 | 46.97 | 68.3% | 99.96% (2 unparsed) | 1.27 s | 41 | $1.11 | `results/simbench/claude-sonnet-5-5__test__142414.jsonl` |
+| Claude Haiku 5.5 (medium) | 33.00 | 45.85 | 39.08 | 64.4% | 99.98% (1 unparsed) | 0.74 s | 92 | $0.081 | `results/simbench/claude-haiku-5-5__test__142414.jsonl` |
+
+0 errors and 0 truncated answers on all three (every `stop_reason` = `end_turn`). Unparsed rows are scored as a uniform guess by the official grader. Measured spend on test, from the per-row token counts × list price: Opus $24.95, Sonnet $5.90, Haiku $0.43.
 
 ## Effort probe (15 dev rows, every effort level)
 `results/simbench/claude_effort_probe_dev15.jsonl` and `..._xhigh_max.jsonl` (native API, `max_tokens` 16,000). Used to choose effort and estimate cost, **not** to compare quality (15 rows is too few).
