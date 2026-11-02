@@ -11,17 +11,12 @@ Written 13:50. Replaces the 1:00 plan (the user said to replace old plans if thi
 |---|---|---|---|---|
 | D1 | **No frontier model key.** The rules require a closed-model baseline on the same test cases | `OPENAI`, `ANTHROPIC`, `AZURE` keys all empty in `.env` | **Lead (human)** | **14:15** |
 | D2 | **Team not registered on HackerSquad** (2–5 people, all in person, every contributor listed) | Not done | **Lead** | 15:00 |
-| D3 | **Which repo gets submitted.** The team's GitHub repo is `anooj-shah/fireworks-hackathon` (Anooj Shah, 1 commit 13:36, cloned at `./repo`). This folder is not a git repo. An inaccessible repo means unscored | Not decided | **Lead + Anooj** | 14:30 |
-| D4 | **Two different test splits exist.** Anooj's repo splits Grouped only (100 questions → test 30 questions / 1,926 rows). Ours splits Pop + Grouped (test 2,116 questions / 5,316 rows, sha256-locked). Only one can be "the" test set | Not decided | **Lead + Anooj** | **14:00** |
+| D3 | **Public repo** | **Resolved 13:55:** team repo `anooj-shah/fireworks-hackathon`, branch `main` (our work merged, commit `fe113d8`). Must be made **public** and checked in incognito before submitting | Lead | 15:30 |
+| D4 | **Which test split** | **Resolved 13:55: ours** (Pop + Grouped, 2,116 test questions, sha256-locked). Anooj's Grouped-only split has 30 test questions, and 12 of them are in our train set. Logged in `docs/decisions.md` | — | done |
 
 Fastest routes for D1: OpenRouter with a card (one key covers GPT, Claude and Gemini); ask the organizers for Azure OpenAI (Microsoft is a host); a teammate's personal key. Every 15 minutes past 14:15 comes straight out of the stats and demo time.
 
-**Recommendation for D4 and D3: keep our split, and submit from Anooj's GitHub repo** (copy our `eval/`, `train/`, `data/` scripts, `docs/` and `results/` into it).
-- **Stats:** 30 test questions makes a weak cluster bootstrap. The rubric asks for 100+ varied cases. Ours has 2,116 questions, including 41 Grouped (more than their 30).
-- **Leakage:** 12 of their 30 test questions are in our training set, so every model already trained (run 1, done 13:46) would be invalid on their split. Switching means retraining from zero.
-- **Their framing still fits:** demographic simulation is our Grouped half, reported separately.
-- **Their code is useful:** `calibration.py` (blend toward even) and `retrieval.py` (similar answers as context) are exactly the harness tricks in §1.5. Use them as harness experiments and credit Anooj.
-- Measured 13:52 (`make_splits.py` logic re-run on our raw CSV).
+Anooj's `simbench/calibration.py` (blend toward even) and `simbench/retrieval.py` (similar real answers as context) are the harness tricks in §1.5. Use them, and credit Anooj in the disclosure.
 
 ## 1. Rules we lock now, before any score exists
 Written down so nobody can say we chose them after seeing results. Logged in `docs/decisions.md`.
