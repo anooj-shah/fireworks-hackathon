@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-"""Task-agnostic eval harness. One code path for Fireworks and closed providers
-(any OpenAI-compatible chat API: Fireworks, OpenAI, Azure OpenAI v1, Anthropic compat).
+"""Task-agnostic evaluation runner. One code path for Fireworks and closed providers
+(any OpenAI-compatible chat API: Fireworks, OpenAI, Azure OpenAI v1), plus a native Anthropic
+path for registry entries with "provider": "anthropic" (Claude 5.5 models take effort via
+output_config, reject temperature, and count thinking toward max_tokens).
+
+Registry "params" override the task's REQUEST_PARAMS (e.g. a thinking model needs a larger max_tokens).
 
 Usage:
   .venv/bin/python eval/run.py --task <task> --model <registry key> --data data/test.jsonl \
@@ -31,6 +35,11 @@ from openai import (APIConnectionError, APIStatusError, APITimeoutError,
                     AsyncOpenAI, RateLimitError)
 from tqdm import tqdm
 
+try:
+    import anthropic
+except ImportError:  # only needed for provider=anthropic entries
+    anthropic = None
+
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "eval"))
 load_dotenv(ROOT / ".env")
@@ -52,9 +61,11 @@ def pct(xs, p):
 
 
 async def call_model(client, cfg, task, messages, stream):
+    if cfg.get("provider") == "anthropic":
+        return await call_anthropic(client, cfg, task, messages)
     kwargs = {"model": cfg["model"], "messages": messages}
-    kwargs.update(cfg.get("params", {}))
     kwargs.update(getattr(task, "REQUEST_PARAMS", {}))
+    kwargs.update(cfg.get("params", {}))
     # Some models (e.g. newer OpenAI) require max_completion_tokens instead of max_tokens
     if cfg.get("use_max_completion_tokens") and "max_tokens" in kwargs:
         kwargs["max_completion_tokens"] = kwargs.pop("max_tokens")
@@ -85,7 +96,37 @@ async def call_model(client, cfg, task, messages, stream):
     latency = time.perf_counter() - t0
     pt = getattr(usage, "prompt_tokens", None) if usage else None
     ct = getattr(usage, "completion_tokens", None) if usage else None
-    return text, latency, ttft, pt, ct
+    return text, latency, ttft, pt, ct, {}
+
+
+async def call_anthropic(client, cfg, task, messages):
+    """Native Messages API, streamed. Same prompt: system message -> `system`, rest -> `messages`.
+    completion_tokens = usage.output_tokens, which includes (billed) thinking tokens."""
+    kwargs = {"model": cfg["model"],
+              "system": "\n\n".join(m["content"] for m in messages if m["role"] == "system"),
+              "messages": [m for m in messages if m["role"] != "system"]}
+    kwargs.update(getattr(task, "REQUEST_PARAMS", {}))
+    kwargs.update(cfg.get("params", {}))
+    if not kwargs["system"]:
+        del kwargs["system"]
+    t0 = time.perf_counter()
+    ttft, parts = None, []
+    async with client.messages.stream(**kwargs) as stream:
+        async for piece in stream.text_stream:
+            if piece and ttft is None:
+                ttft = time.perf_counter() - t0
+            parts.append(piece)
+        final = await stream.get_final_message()
+    latency = time.perf_counter() - t0
+    return ("".join(parts), latency, ttft, final.usage.input_tokens, final.usage.output_tokens,
+            {"stop_reason": final.stop_reason})
+
+
+_TRANSIENT = (RateLimitError, APIConnectionError, APITimeoutError)
+_STATUS = (APIStatusError,)
+if anthropic is not None:
+    _TRANSIENT += (anthropic.RateLimitError, anthropic.APIConnectionError, anthropic.APITimeoutError)
+    _STATUS += (anthropic.APIStatusError,)
 
 
 async def with_retries(fn, tries=6):
@@ -93,9 +134,9 @@ async def with_retries(fn, tries=6):
     for i in range(tries):
         try:
             return await fn()
-        except (RateLimitError, APIConnectionError, APITimeoutError) as e:
+        except _TRANSIENT as e:
             err = e
-        except APIStatusError as e:
+        except _STATUS as e:
             if e.status_code < 500:
                 raise
             err = e
@@ -111,8 +152,13 @@ async def run(args):
     api_key = os.environ.get(cfg["api_key_env"])
     if not api_key:
         sys.exit(f"missing env var {cfg['api_key_env']} (put it in .env)")
-    client = AsyncOpenAI(base_url=cfg["base_url"], api_key=api_key,
-                         timeout=args.timeout, max_retries=0)
+    if cfg.get("provider") == "anthropic":
+        if anthropic is None:
+            sys.exit("pip install anthropic (needed for provider=anthropic)")
+        client = anthropic.AsyncAnthropic(api_key=api_key, timeout=args.timeout, max_retries=0)
+    else:
+        client = AsyncOpenAI(base_url=cfg["base_url"], api_key=api_key,
+                             timeout=args.timeout, max_retries=0)
     task = importlib.import_module(f"tasks.{args.task}")
 
     with open(args.data) as f:
@@ -133,12 +179,12 @@ async def run(args):
         async with sem:
             messages = task.build_messages(item)
             try:
-                text, lat, ttft, pt, ct = await with_retries(
+                text, lat, ttft, pt, ct, meta = await with_retries(
                     lambda: call_model(client, cfg, task, messages, not args.no_stream))
                 g = task.grade(item, text)
                 rec = {"i": i, "id": item.get("id", i), "group": item.get("group"), "ok": True,
                        "output": text, "latency": lat, "ttft": ttft,
-                       "prompt_tokens": pt, "completion_tokens": ct, **g}
+                       "prompt_tokens": pt, "completion_tokens": ct, **meta, **g}
             except Exception as e:  # recorded, counted as score 0, reported in summary
                 rec = {"i": i, "id": item.get("id", i), "group": item.get("group"), "ok": False,
                        "error": f"{type(e).__name__}: {e}"[:500], "score": 0.0}
@@ -176,8 +222,9 @@ async def run(args):
     summary = {
         "time": datetime.now().isoformat(timespec="seconds"),
         "task": args.task, "model": args.model, "model_id": cfg["model"], "label": label,
-        "closed": cfg.get("closed", False),
+        "closed": cfg.get("closed", False), "data": args.data, "params": cfg.get("params", {}),
         "n": len(items), "errors": len(items) - len(ok),
+        "truncated": sum(r.get("stop_reason") == "max_tokens" for r in ok),
         "score": mean([r["score"] for r in records]),  # errors count as 0
         **{f"m_{k}": v for k, v in sorted(extra.items()) if k != "score"},
         "p50_latency": pct(lat, 50), "p95_latency": pct(lat, 95), "p50_ttft": pct(ttfts, 50),

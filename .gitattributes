@@ -1,0 +1,5 @@
+# append-only results log: keep both sides' rows when two people push
+results/simbench/summary.jsonl merge=union
+results/twin2k/summary.jsonl merge=union
+results/polls2026/summary.jsonl merge=union
+results/sfballot/summary.jsonl merge=union

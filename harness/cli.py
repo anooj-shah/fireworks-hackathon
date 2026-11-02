@@ -1,0 +1,156 @@
+#!/usr/bin/env python3
+"""Crowdcast, run locally: describe one or more groups + a multiple-choice question -> % of each group per answer.
+
+Same system as the one scored on dev/test (harness/fit.py): the official SimBench prompt (eval/tasks/simbench.py),
+members F (our fine-tune) + O (open model on Fireworks serverless, thinking off) called in parallel, survey memory
+from the training split, and the frozen dev weights from results/simbench/crowdcast_fit__<label>.json.
+
+  ../.venv/bin/python harness/cli.py \
+      --group "The year is 2026. You are from the United States. You are in the 18-29 age group." \
+      --group "The year is 2026. You are from the United States. You are in the 65+ age group." \
+      --question "Do you support a four-day work week?" --option "Yes" --option "No" --option "Not sure"
+
+F needs a deployment of the fine-tune (registry key "fw-ft" in eval/models.json; the scored runs used the training
+sampler). Until it exists, --allow-partial runs without F and says loudly that it is NOT the evaluated system.
+"""
+import argparse
+import json
+import os
+import string
+import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "eval"))
+sys.path.insert(0, str(ROOT / "harness"))
+from tasks import simbench as T  # noqa: E402
+import crowdcast as C  # noqa: E402
+
+
+def registry():
+    return json.loads((ROOT / "eval" / "models.json").read_text())
+
+
+def call(cfg, messages):
+    """One chat call with the same parameters eval/run.py uses (task REQUEST_PARAMS, then registry params)."""
+    from openai import OpenAI
+    client = OpenAI(api_key=os.environ[cfg["api_key_env"]], base_url=cfg["base_url"])
+    kw = {"model": cfg["model"], "messages": messages, **T.REQUEST_PARAMS, **cfg.get("params", {})}
+    t0 = time.perf_counter()
+    r = client.chat.completions.create(**kw)
+    lat = time.perf_counter() - t0
+    u = r.usage
+    cost = None
+    if u and cfg.get("price_in") is not None and cfg.get("price_out") is not None:
+        cost = (u.prompt_tokens * cfg["price_in"] + u.completion_tokens * cfg["price_out"]) / 1e6
+    return {"text": r.choices[0].message.content or "", "latency": lat, "cost": cost}
+
+
+def bar(p, width=30):
+    n = int(round(p * width))
+    return "█" * n + "·" * (width - n)
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--group", action="append", required=True, help="group description (repeat for several)")
+    ap.add_argument("--question", required=True)
+    ap.add_argument("--option", action="append", required=True, help="answer option (repeat, in order)")
+    ap.add_argument("--fit", default="results/simbench/crowdcast_fit__v1.json", help="fit JSON from harness/fit.py")
+    ap.add_argument("--f-model", default="fw-ft", help="registry key of the DEPLOYED fine-tune")
+    ap.add_argument("--allow-partial", action="store_true", help="run without F if it isn't deployed (not the evaluated system)")
+    ap.add_argument("--json", action="store_true", help="print machine-readable output")
+    a = ap.parse_args()
+
+    from dotenv import load_dotenv
+    load_dotenv(ROOT / ".env")
+    if len(a.option) < 2 or len(a.option) > 26:
+        sys.exit("need 2-26 options")
+    fit = json.loads((ROOT / a.fit).read_text())
+    ch = fit["chosen"]
+    weights = dict(ch["weights"])
+    reg = registry()
+    o_cfg = reg[ch["o_model_key"]]
+    if not os.environ.get(o_cfg["api_key_env"]):
+        sys.exit(f"{o_cfg['api_key_env']} is not set: put it in {ROOT / '.env'} (see .env.example)")
+    f_cfg = reg.get(a.f_model)
+    f_ok = bool(f_cfg) and "FILL" not in f_cfg.get("model", "FILL")
+    partial = False
+    if not f_ok:
+        if not a.allow_partial:
+            sys.exit(f"F (registry key '{a.f_model}') has no deployed model yet. Deploy the fine-tune and set its model id, "
+                     "or pass --allow-partial to run without F (NOT the evaluated system).")
+        partial = True
+        wf = weights.pop("F", 0.0)
+        rest = sum(weights.values())
+        weights = {k: v / rest for k, v in weights.items()} if rest > 0 else {"U": 1.0}
+        print(f"!! PARTIAL RUN: F not deployed. Its weight {wf:.2f} was dropped and the rest renormalized. "
+              "This is NOT the system scored on dev/test.", file=sys.stderr)
+
+    labels = list(string.ascii_uppercase[: len(a.option)])
+    question = a.question.strip() + "\n\nOptions:\n" + "\n".join(f"({l}): {o}" for l, o in zip(labels, a.option))
+    memory = C.Memory.from_train()
+
+    def run_group(persona):
+        item = {"persona": persona, "question": question, "labels": labels}
+        msgs = T.build_messages(item)
+        jobs = {"O": o_cfg}
+        if f_ok:
+            jobs["F"] = f_cfg
+        t0 = time.perf_counter()
+        with ThreadPoolExecutor(len(jobs)) as ex:
+            futs = {k: ex.submit(call, cfg, msgs) for k, cfg in jobs.items()}
+            outs = {}
+            for k, fu in futs.items():
+                try:
+                    outs[k] = fu.result()
+                except Exception as e:  # a failed member counts as uniform, as in the eval
+                    outs[k] = {"text": "", "latency": None, "cost": None, "error": str(e)[:200]}
+        wall = time.perf_counter() - t0
+        dists = {k: T.parse_dist(item, v["text"]) for k, v in outs.items()}
+        dists["M"] = memory.predict(persona, question, labels)
+        q = C.combine(dists, weights, labels)
+        dis = C.disagreement(dists, labels)
+        flag = None if dis is None else dis > ch["trust_threshold"]
+        costs = [v["cost"] for v in outs.values() if v.get("cost") is not None]
+        return {"group": persona, "prediction": {l: q[l] for l in labels},
+                "members": {k: (None if d is None else {l: round(d[l], 4) for l in labels}) for k, d in dists.items()},
+                "member_errors": {k: v["error"] for k, v in outs.items() if v.get("error")},
+                "disagreement": dis, "ask_real_people": flag, "latency_s": wall,
+                "cost_usd": sum(costs) if costs else None,
+                "evidence": [{"similarity": round(s, 3), "persona": it["persona"], "question": it["question"].split("\n")[0][:120],
+                              "real": {l: round(it["human"][l], 3) for l in labels}}
+                             for s, it in memory.neighbors(persona, question, labels, k=3)]}
+
+    results = [run_group(g) for g in a.group]
+    meta = {"weights_used": weights, "partial_run": partial, "O": o_cfg["model"], "F": f_cfg["model"] if f_ok else None,
+            "fit": a.fit, "trust_threshold": ch["trust_threshold"]}
+    if a.json:
+        print(json.dumps({"meta": meta, "question": question, "results": results}, indent=1))
+        return
+    print(f"\n{question}\n")
+    print(f"weights {', '.join(f'{k}={v:.2f}' for k, v in weights.items())}"
+          f"{'   [PARTIAL: no F]' if partial else ''}")
+    for r in results:
+        print(f"\n▶ {r['group']}")
+        for l, o in zip(labels, a.option):
+            p = r["prediction"][l]
+            print(f"  ({l}) {o[:28]:28} {bar(p)} {100 * p:5.1f}%")
+        if r["ask_real_people"] is None:
+            trust = "trust flag n/a (needs F and O)"
+        else:
+            trust = ("ASK REAL PEOPLE: the models disagree" if r["ask_real_people"] else "models agree: trust it") + \
+                    f" (disagreement {r['disagreement']:.2f}, threshold {ch['trust_threshold']:.2f})"
+        cost = f"${r['cost_usd']:.5f}" if r["cost_usd"] is not None else "n/a"
+        print(f"  {trust} | {r['latency_s']:.2f} s | {cost}")
+        for k, err in r["member_errors"].items():
+            print(f"  !! member {k} failed (counted as uniform): {err}")
+        if r["evidence"]:
+            e = r["evidence"][0]
+            print(f"  closest past survey question (sim {e['similarity']}): {e['question']}")
+
+
+if __name__ == "__main__":
+    main()

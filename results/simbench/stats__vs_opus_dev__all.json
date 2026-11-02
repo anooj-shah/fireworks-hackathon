@@ -1,0 +1,66 @@
+[
+  {
+    "base": "claude-opus-5-5:dev",
+    "new": "ft-qwen:q36-3k-1e4",
+    "subset": "all",
+    "base_score": 0.5327876277564683,
+    "new_score": 0.39743763672457216,
+    "mcnemar_top1": {
+      "only_new": 210,
+      "only_base": 297,
+      "units": 1490,
+      "p": 0.00012918144932800446
+    },
+    "closer": {
+      "new_closer": 224,
+      "base_closer": 313,
+      "ties": 5,
+      "n_groups": 542,
+      "win_rate": 0.4171322160148976,
+      "p": 0.0001415369711795504
+    },
+    "bootstrap": {
+      "gap": -0.13534999103189616,
+      "ci_low": -0.21894681429174861,
+      "ci_high": -0.043990920025064946,
+      "ahead": 14,
+      "B": 5000,
+      "n_groups": 542,
+      "n_items": 1490
+    },
+    "unpaired_ids": 0,
+    "significant": true
+  },
+  {
+    "base": "claude-opus-5-5:dev",
+    "new": "claude-haiku-5-5:dev",
+    "subset": "all",
+    "base_score": 0.5327876277564683,
+    "new_score": 0.38585260113541453,
+    "mcnemar_top1": {
+      "only_new": 136,
+      "only_base": 236,
+      "units": 1490,
+      "p": 2.432447075180159e-07
+    },
+    "closer": {
+      "new_closer": 185,
+      "base_closer": 335,
+      "ties": 22,
+      "n_groups": 542,
+      "win_rate": 0.3557692307692308,
+      "p": 4.733321692476602e-11
+    },
+    "bootstrap": {
+      "gap": -0.1469350266210538,
+      "ci_low": -0.19159990080933315,
+      "ci_high": -0.10289724089330685,
+      "ahead": 0,
+      "B": 5000,
+      "n_groups": 542,
+      "n_items": 1490
+    },
+    "unpaired_ids": 0,
+    "significant": true
+  }
+]

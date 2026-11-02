@@ -1,0 +1,35 @@
+{
+  "n_items": 754,
+  "mean_model_tvd": 0.2719498454773596,
+  "aggregate_n": 3.985400397935049,
+  "median_item_n": 5.565139621274934,
+  "curve": {
+    "1": 0.5130146940207495,
+    "2": 0.37805330641553586,
+    "3": 0.31010460853088717,
+    "5": 0.24148249187748433,
+    "7": 0.2039613451179605,
+    "10": 0.17098346426960037,
+    "15": 0.13954143450015277,
+    "20": 0.12059597274132879,
+    "30": 0.09842074805073982,
+    "50": 0.07618796440540065,
+    "75": 0.06222736350002844,
+    "100": 0.053799916457102546,
+    "150": 0.0439124441739877,
+    "200": 0.03804035603727008,
+    "300": 0.03106779654215228,
+    "500": 0.024131613632947326,
+    "750": 0.019667162725627612,
+    "1000": 0.017017733535694368,
+    "2000": 0.01204142320507549,
+    "5000": 0.007604121501540464,
+    "10000": 0.005387056608107485
+  },
+  "results": [
+    "results/simbench/qwen-base__dev-base__141331.jsonl"
+  ],
+  "data": "data/dev.jsonl",
+  "subset": "pop",
+  "assumptions": "(copy these into the README next to the number):\n  - p is treated as the truth. In reality p is itself a finite survey sample, so this is \"worth N\" against\n    the published survey result, not against the whole population.\n  - Poll respondents are simple random draws from p (no non-response or panel bias), so real polls of size n\n    are usually worse than simulated ones, which makes this number conservative for the model.\n  - Unparseable model outputs count as a uniform guess, as in the grader."
+}

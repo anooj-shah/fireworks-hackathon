@@ -1,5 +1,5 @@
 {
-  "_README": "Registry for eval/run.py. price_in/price_out = USD per 1M tokens (null = cost not computed). closed=true marks baselines (red on chart). params are passed to chat.completions.create. FILL_ME entries get set once we pick models and keys.",
+  "_README": "Registry for eval/run.py. price_in/price_out = USD per 1M tokens (null = cost not computed). closed=true marks baselines (red on chart). params are passed to chat.completions.create (or messages.stream for provider=anthropic) and override the task REQUEST_PARAMS. FILL_ME entries get set once we pick models and keys.",
 
   "mock": {"base_url": "http://127.0.0.1:8765/v1", "api_key_env": "MOCK_API_KEY", "model": "mock-model",
            "price_in": 0.2, "price_out": 0.2, "params": {"temperature": 0}},
@@ -9,9 +9,15 @@
   "gpt-61-terra": {"base_url": "https://api.openai.com/v1", "api_key_env": "OPENAI_API_KEY",
                    "model": "gpt-6.1-terra", "price_in": null, "price_out": null, "closed": true,
                    "use_max_completion_tokens": true, "params": {}},
-  "closed-anthropic": {"base_url": "https://api.anthropic.com/v1/", "api_key_env": "ANTHROPIC_API_KEY",
-                       "model": "FILL_ME", "price_in": null, "price_out": null, "closed": true,
-                       "supports_response_format": false, "params": {"temperature": 0}},
+  "claude-opus-5-5": {"provider": "anthropic", "api_key_env": "ANTHROPIC_API_KEY", "model": "claude-opus-5-5",
+                      "price_in": 4.0, "price_out": 20.0, "closed": true,
+                      "params": {"max_tokens": 16000, "output_config": {"effort": "high"}}},
+  "claude-sonnet-5-5": {"provider": "anthropic", "api_key_env": "ANTHROPIC_API_KEY", "model": "claude-sonnet-5-5",
+                        "price_in": 2.0, "price_out": 10.0, "closed": true,
+                        "params": {"max_tokens": 16000, "output_config": {"effort": "high"}}},
+  "claude-haiku-5-5": {"provider": "anthropic", "api_key_env": "ANTHROPIC_API_KEY", "model": "claude-haiku-5-5",
+                       "price_in": 0.10, "price_out": 0.50, "closed": true,
+                       "params": {"max_tokens": 16000, "output_config": {"effort": "medium"}}},
   "closed-azure": {"base_url": "https://FILL_RESOURCE.openai.azure.com/openai/v1/", "api_key_env": "AZURE_OPENAI_API_KEY",
                    "model": "FILL_DEPLOYMENT", "price_in": null, "price_out": null, "closed": true, "params": {}},
 
@@ -27,6 +33,14 @@
                "model": "accounts/fireworks/models/FILL_ME", "price_in": null, "price_out": null, "params": {"temperature": 0}},
   "fw-large": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
                "model": "accounts/fireworks/models/FILL_ME", "price_in": null, "price_out": null, "params": {"temperature": 0}},
+  "fw-kimi-k3": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
+                 "model": "accounts/fireworks/models/kimi-k3", "price_in": 3.0, "price_out": 15.0, "params": {"temperature": 0, "reasoning_effort": "none"}},
+  "fw-glm-5p3": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
+                 "model": "accounts/fireworks/models/glm-5p3", "price_in": 1.40, "price_out": 4.40, "params": {"temperature": 0}},
+  "fw-qwen3p8-max": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
+                     "model": "accounts/fireworks/models/qwen3p8-max", "price_in": 2.0, "price_out": 6.0, "params": {"temperature": 0, "reasoning_effort": "none"}},
+  "fw-deepseek-v4p1-flash": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
+                             "model": "accounts/fireworks/models/deepseek-v4p1-flash", "price_in": 0.30, "price_out": 1.20, "params": {"temperature": 0, "reasoning_effort": "none"}},
   "fw-ft": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
             "model": "accounts/FILL_ACCOUNT/models/FILL_FT_MODEL", "price_in": null, "price_out": null, "params": {"temperature": 0}}
 }

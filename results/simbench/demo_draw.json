@@ -1,0 +1,189 @@
+{
+  "rule": "(fixed before any test-set score of ours existed):\n  Pool = Grouped rows of data/test.jsonl, excluding questions about immigration or religion.\n  For each question, compare every pair of groups whose descriptions differ in exactly ONE trait\n  (e.g. same country, different age group), ignoring pairs that differ in religion.\n  Gap = the largest difference, over the answer options, between the two groups' real percentages.\n  Both groups must be split internally: no answer above 60% in either group. (v1 of this rule, 14:36, had\n  no such filter and picked tautologies where the group description IS the answer, e.g. \"what social class\n  are you?\" for people described by their class. Fixed at 14:37 using only the human data, before looking at\n  any model output on these rows.)\n  The demo uses the question + pair with the largest gap. The top 5 are saved so judges can see the\n  runners-up. It's an illustration of the failure mode, not a representative sample.",
+  "pool_questions": 34,
+  "pairs_considered": 1831,
+  "chosen": {
+    "gap": 0.5259,
+    "option": "A",
+    "trait": "country",
+    "question_group": "21e2605bc47c",
+    "ids": [
+      "grouped-5365",
+      "grouped-5370"
+    ],
+    "personas": [
+      "The year is 2023. You are from Chile. You are in the 30-49 age group.",
+      "The year is 2023. You are from Venezuela. You are in the 30-49 age group."
+    ],
+    "human": [
+      {
+        "A": 1,
+        "B": 16,
+        "C": 41,
+        "D": 41
+      },
+      {
+        "A": 54,
+        "B": 24,
+        "C": 11,
+        "D": 11
+      }
+    ],
+    "question": "Overall, do you have a very favorable, somewhat favorable, somewhat unfavorable, or very unfavorable opinion of Venezuela?\n\nOptions:\n(A): Very favorable\n(B): Somewhat favorable\n(C): Somewhat unfavorable\n(D): Very unfavorable"
+  },
+  "top5": [
+    {
+      "gap": 0.5259,
+      "option": "A",
+      "trait": "country",
+      "question_group": "21e2605bc47c",
+      "ids": [
+        "grouped-5365",
+        "grouped-5370"
+      ],
+      "personas": [
+        "The year is 2023. You are from Chile. You are in the 30-49 age group.",
+        "The year is 2023. You are from Venezuela. You are in the 30-49 age group."
+      ],
+      "human": [
+        {
+          "A": 1,
+          "B": 16,
+          "C": 41,
+          "D": 41
+        },
+        {
+          "A": 54,
+          "B": 24,
+          "C": 11,
+          "D": 11
+        }
+      ],
+      "question": "Overall, do you have a very favorable, somewhat favorable, somewhat unfavorable, or very unfavorable opinion of Venezuela?\n\nOptions:\n(A): Very favorable\n(B): Somewhat favorable\n(C): Somewhat unfavorable\n(D): Very unfavorable"
+    },
+    {
+      "gap": 0.5213,
+      "option": "A",
+      "trait": "cntry",
+      "question_group": "36b49a17aec1",
+      "ids": [
+        "grouped-2207",
+        "grouped-2208"
+      ],
+      "personas": [
+        "The year is 2016. You are from the Netherlands. In terms of religiosity, on a scale of 0 (not at all religious) to 10 (very religious), you are 0.0.",
+        "The year is 2016. You are from Hungary. In terms of religiosity, on a scale of 0 (not at all religious) to 10 (very religious), you are 0.0."
+      ],
+      "human": [
+        {
+          "A": 60,
+          "B": 30,
+          "C": 5,
+          "D": 3,
+          "E": 2
+        },
+        {
+          "A": 8,
+          "B": 10,
+          "C": 17,
+          "D": 19,
+          "E": 47
+        }
+      ],
+      "question": "Using this card, please say to what extent you agree or disagree with each of the following statements. Gay male and lesbian couples should have the same rights to adopt children as straight couples.\n\nOptions:\n(A): Agree strongly\n(B): Agree\n(C): Neither agree nor disagree\n(D): Disagree\n(E): Disagree strongly"
+    },
+    {
+      "gap": 0.5213,
+      "option": "D",
+      "trait": "country",
+      "question_group": "4d130b7e0da9",
+      "ids": [
+        "grouped-5702",
+        "grouped-5705"
+      ],
+      "personas": [
+        "The year is 2023. You are from Guatemala. In terms of religiosity, you are not very devout.",
+        "The year is 2023. You are from Brazil. In terms of religiosity, you are not very devout."
+      ],
+      "human": [
+        {
+          "A": 6,
+          "B": 37,
+          "C": 51,
+          "D": 6
+        },
+        {
+          "A": 14,
+          "B": 13,
+          "C": 15,
+          "D": 58
+        }
+      ],
+      "question": "Please tell me whether you strongly agree, agree, disagree or strongly disagree with the following statement: It is better that women concentrate at home and men at work\n\nOptions:\n(A): Strongly agree\n(B): Agree\n(C): Disagree\n(D): Strongly disagree"
+    },
+    {
+      "gap": 0.5146,
+      "option": "E",
+      "trait": "cntry",
+      "question_group": "1e87e9b2c57c",
+      "ids": [
+        "grouped-2384",
+        "grouped-2387"
+      ],
+      "personas": [
+        "The year is 2016. You are from Russia. In terms of political orientation, on a scale of 0 (left) to 10 (right), you are 5.0.",
+        "The year is 2016. You are from Belgium. In terms of political orientation, on a scale of 0 (left) to 10 (right), you are 5.0."
+      ],
+      "human": [
+        {
+          "A": 41,
+          "B": 26,
+          "C": 15,
+          "D": 10,
+          "E": 9
+        },
+        {
+          "A": 3,
+          "B": 6,
+          "C": 8,
+          "D": 23,
+          "E": 60
+        }
+      ],
+      "question": "Using this card, please say to what extent you agree or disagree with each of the following statements. If a close family member was a gay man or a lesbian, I would feel ashamed.\n\nOptions:\n(A): Agree strongly\n(B): Agree\n(C): Neither agree nor disagree\n(D): Disagree\n(E): Disagree strongly"
+    },
+    {
+      "gap": 0.4637,
+      "option": "E",
+      "trait": "country",
+      "question_group": "52288ddbb7ea",
+      "ids": [
+        "grouped-4274",
+        "grouped-4277"
+      ],
+      "personas": [
+        "The timeframe is 2017-2020. You are from Switzerland. You live in a big city.",
+        "The timeframe is 2017-2020. You are from Russia. You live in a big city."
+      ],
+      "human": [
+        {
+          "A": 2,
+          "B": 5,
+          "C": 19,
+          "D": 23,
+          "E": 51,
+          "F": 0
+        },
+        {
+          "A": 16,
+          "B": 33,
+          "C": 24,
+          "D": 18,
+          "E": 5,
+          "F": 3
+        }
+      ],
+      "question": "Do you agree or disagree with the following statement?\n\nA husband's job is to earn money; a wife's job is to look after the home and family.\n\nOptions:\n(A): Strongly agree\n(B): Agree\n(C): Neither agree nor disagree\n(D): Disagree\n(E): Strongly disagree\n(F): Can't choose"
+    }
+  ]
+}

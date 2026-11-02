@@ -1,0 +1,26 @@
+{
+ "run": "crowdcast:sfballot-v1",
+ "live_members": {},
+ "inputs_ok": true,
+ "weights": {
+  "F": 0.4,
+  "O": 0.4,
+  "M": 0.2,
+  "U": 0.0
+ },
+ "committed": {
+  "pop": 32.72518491623605,
+  "grouped": 27.659666439816537,
+  "all": 28.081792979518166
+ },
+ "reproduced": {
+  "pop": 32.72518491623605,
+  "grouped": 27.659666439816544,
+  "all": 28.081792979518166
+ },
+ "n_items": 228,
+ "max_item_diff": 3.3306690738754696e-14,
+ "max_regrade_diff_of_committed_output_text": 3.4790385257110756e-06,
+ "reproduced_exactly": true,
+ "verdict": "REPRODUCED EXACTLY: crowdcast:sfballot-v1 pop 32.7252 / grouped 27.6597 / all 28.0818"
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "base": "claude-opus-5-5:dev",
+    "new": "ft-glm:glm-800-1e4",
+    "subset": "pop",
+    "base_score": 0.42536457435284575,
+    "new_score": 0.32439149220304264,
+    "mcnemar_top1": {
+      "only_new": 91,
+      "only_base": 136,
+      "units": 754,
+      "p": 0.0034053289479651807
+    },
+    "closer": {
+      "new_closer": 209,
+      "base_closer": 320,
+      "ties": 9,
+      "n_groups": 538,
+      "win_rate": 0.3950850661625709,
+      "p": 1.5918030503169604e-06
+    },
+    "bootstrap": {
+      "gap": -0.10097308214980309,
+      "ci_low": -0.1616714329840718,
+      "ci_high": -0.03896146827012048,
+      "ahead": 6,
+      "B": 5000,
+      "n_groups": 538,
+      "n_items": 754
+    },
+    "unpaired_ids": 0,
+    "significant": true
+  }
+]

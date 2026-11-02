@@ -1,0 +1,558 @@
+{
+  "new": "crowdcast:dev-v1",
+  "split": "dev",
+  "data": "data/dev.jsonl",
+  "comparisons": [
+    {
+      "vs": "Claude Opus 5.5 (high)",
+      "vs_spec": "claude-opus-5-5:dev",
+      "subset": "pop",
+      "n_items": 754,
+      "n_questions": 538,
+      "base_score": 42.536457435284575,
+      "new_score": 41.12219189652828,
+      "gap": -1.4142655387562983,
+      "ci_low": -6.043111500204393,
+      "ci_high": 3.2624275464223285,
+      "ahead": 1409,
+      "B": 5000,
+      "closer": {
+        "new_closer": 242,
+        "base_closer": 296,
+        "ties": 0,
+        "n_groups": 538,
+        "win_rate": 0.44981412639405205,
+        "p": 0.0222255513806202
+      },
+      "mcnemar_top1": {
+        "only_new": 95,
+        "only_base": 127,
+        "units": 754,
+        "p": 0.03723311121185057
+      },
+      "verdict": "can't tell apart"
+    },
+    {
+      "vs": "Claude Opus 5.5 (high)",
+      "vs_spec": "claude-opus-5-5:dev",
+      "subset": "grouped",
+      "n_items": 736,
+      "n_questions": 12,
+      "base_score": 64.28378754009404,
+      "new_score": 54.420318399206906,
+      "gap": -9.863469140887126,
+      "ci_low": -20.362289457886945,
+      "ci_high": 3.8734360267619263,
+      "ahead": 399,
+      "B": 5000,
+      "closer": {
+        "new_closer": 2,
+        "base_closer": 10,
+        "ties": 0,
+        "n_groups": 12,
+        "win_rate": 0.16666666666666666,
+        "p": 0.03857421875
+      },
+      "mcnemar_top1": {
+        "only_new": 110,
+        "only_base": 103,
+        "units": 736,
+        "p": 0.6810883208060332
+      },
+      "verdict": "can't tell apart"
+    },
+    {
+      "vs": "Claude Opus 5.5 (high)",
+      "vs_spec": "claude-opus-5-5:dev",
+      "subset": "all",
+      "n_items": 1490,
+      "n_questions": 542,
+      "base_score": 53.278762775646825,
+      "new_score": 47.69093089382456,
+      "gap": -5.587831881822269,
+      "ci_low": -11.608784153650523,
+      "ci_high": 2.00865513395646,
+      "ahead": 344,
+      "B": 5000,
+      "closer": {
+        "new_closer": 243,
+        "base_closer": 299,
+        "ties": 0,
+        "n_groups": 542,
+        "win_rate": 0.4483394833948339,
+        "p": 0.018072860365828045
+      },
+      "mcnemar_top1": {
+        "only_new": 205,
+        "only_base": 230,
+        "units": 1490,
+        "p": 0.24982159608779608
+      },
+      "verdict": "can't tell apart"
+    },
+    {
+      "vs": "Claude Sonnet 5.5",
+      "vs_spec": "claude-sonnet-5-5:dev",
+      "subset": "pop",
+      "n_items": 754,
+      "n_questions": 538,
+      "base_score": 35.628478333881084,
+      "new_score": 41.12219189652828,
+      "gap": 5.493713562647192,
+      "ci_low": 1.0547031962944013,
+      "ci_high": 10.060145253959242,
+      "ahead": 4962,
+      "B": 5000,
+      "closer": {
+        "new_closer": 286,
+        "base_closer": 252,
+        "ties": 0,
+        "n_groups": 538,
+        "win_rate": 0.5315985130111525,
+        "p": 0.1547487524081197
+      },
+      "mcnemar_top1": {
+        "only_new": 110,
+        "only_base": 94,
+        "units": 754,
+        "p": 0.293602453979378
+      },
+      "verdict": "can't tell apart"
+    },
+    {
+      "vs": "Claude Sonnet 5.5",
+      "vs_spec": "claude-sonnet-5-5:dev",
+      "subset": "grouped",
+      "n_items": 736,
+      "n_questions": 12,
+      "base_score": 61.55797244026593,
+      "new_score": 54.420318399206906,
+      "gap": -7.137654041059018,
+      "ci_low": -17.832128434828952,
+      "ci_high": 5.9123410767370315,
+      "ahead": 655,
+      "B": 5000,
+      "closer": {
+        "new_closer": 2,
+        "base_closer": 10,
+        "ties": 0,
+        "n_groups": 12,
+        "win_rate": 0.16666666666666666,
+        "p": 0.03857421875
+      },
+      "mcnemar_top1": {
+        "only_new": 110,
+        "only_base": 102,
+        "units": 736,
+        "p": 0.6307898865914234
+      },
+      "verdict": "can't tell apart"
+    },
+    {
+      "vs": "Claude Sonnet 5.5",
+      "vs_spec": "claude-sonnet-5-5:dev",
+      "subset": "all",
+      "n_items": 1490,
+      "n_questions": 542,
+      "base_score": 48.43660428173292,
+      "new_score": 47.69093089382456,
+      "gap": -0.7456733879083587,
+      "ci_low": -6.8300463811388035,
+      "ci_high": 6.574016309724732,
+      "ahead": 1992,
+      "B": 5000,
+      "closer": {
+        "new_closer": 284,
+        "base_closer": 258,
+        "ties": 0,
+        "n_groups": 542,
+        "win_rate": 0.5239852398523985,
+        "p": 0.2828823578711777
+      },
+      "mcnemar_top1": {
+        "only_new": 220,
+        "only_base": 196,
+        "units": 1490,
+        "p": 0.2594345907402007
+      },
+      "verdict": "can't tell apart"
+    },
+    {
+      "vs": "Claude Haiku 5.5",
+      "vs_spec": "claude-haiku-5-5:dev",
+      "subset": "pop",
+      "n_items": 754,
+      "n_questions": 538,
+      "base_score": 29.75781014778098,
+      "new_score": 41.12219189652828,
+      "gap": 11.364381748747295,
+      "ci_low": 7.052685996920137,
+      "ci_high": 15.776076319533708,
+      "ahead": 5000,
+      "B": 5000,
+      "closer": {
+        "new_closer": 333,
+        "base_closer": 205,
+        "ties": 0,
+        "n_groups": 538,
+        "win_rate": 0.6189591078066915,
+        "p": 3.7883279123623495e-08
+      },
+      "mcnemar_top1": {
+        "only_new": 117,
+        "only_base": 79,
+        "units": 754,
+        "p": 0.008057137128552385
+      },
+      "verdict": "real gain"
+    },
+    {
+      "vs": "Claude Haiku 5.5",
+      "vs_spec": "claude-haiku-5-5:dev",
+      "subset": "grouped",
+      "n_items": 736,
+      "n_questions": 12,
+      "base_score": 47.62859880129063,
+      "new_score": 54.420318399206906,
+      "gap": 6.791719597916282,
+      "ci_low": -4.959583748262722,
+      "ci_high": 20.889713066757437,
+      "ahead": 4178,
+      "B": 5000,
+      "closer": {
+        "new_closer": 6,
+        "base_closer": 6,
+        "ties": 0,
+        "n_groups": 12,
+        "win_rate": 0.5,
+        "p": 1.0
+      },
+      "mcnemar_top1": {
+        "only_new": 134,
+        "only_base": 97,
+        "units": 736,
+        "p": 0.017663498395802436
+      },
+      "verdict": "can't tell apart"
+    },
+    {
+      "vs": "Claude Haiku 5.5",
+      "vs_spec": "claude-haiku-5-5:dev",
+      "subset": "all",
+      "n_items": 1490,
+      "n_questions": 542,
+      "base_score": 38.58526011354145,
+      "new_score": 47.69093089382456,
+      "gap": 9.105670780283111,
+      "ci_low": 2.9225351192845306,
+      "ci_high": 16.500737389874356,
+      "ahead": 4997,
+      "B": 5000,
+      "closer": {
+        "new_closer": 334,
+        "base_closer": 208,
+        "ties": 0,
+        "n_groups": 542,
+        "win_rate": 0.6162361623616236,
+        "p": 6.943136361025468e-08
+      },
+      "mcnemar_top1": {
+        "only_new": 251,
+        "only_base": 176,
+        "units": 1490,
+        "p": 0.00033135665802209037
+      },
+      "verdict": "real gain"
+    },
+    {
+      "vs": "own untrained base",
+      "vs_spec": "qwen-base:dev-base",
+      "subset": "pop",
+      "n_items": 754,
+      "n_questions": 538,
+      "base_score": 10.101736343481775,
+      "new_score": 41.12219189652828,
+      "gap": 31.0204555530465,
+      "ci_low": 25.069460497148338,
+      "ci_high": 37.065683819726274,
+      "ahead": 5000,
+      "B": 5000,
+      "closer": {
+        "new_closer": 368,
+        "base_closer": 170,
+        "ties": 0,
+        "n_groups": 538,
+        "win_rate": 0.6840148698884758,
+        "p": 8.568367522026064e-18
+      },
+      "mcnemar_top1": {
+        "only_new": 167,
+        "only_base": 77,
+        "units": 754,
+        "p": 8.311105795516224e-09
+      },
+      "verdict": "real gain"
+    },
+    {
+      "vs": "own untrained base",
+      "vs_spec": "qwen-base:dev-base",
+      "subset": "grouped",
+      "n_items": 736,
+      "n_questions": 12,
+      "base_score": 25.23587576876823,
+      "new_score": 54.420318399206906,
+      "gap": 29.184442630438674,
+      "ci_low": 11.971608823043473,
+      "ci_high": 45.972819804598174,
+      "ahead": 5000,
+      "B": 5000,
+      "closer": {
+        "new_closer": 10,
+        "base_closer": 2,
+        "ties": 0,
+        "n_groups": 12,
+        "win_rate": 0.8333333333333334,
+        "p": 0.03857421875
+      },
+      "mcnemar_top1": {
+        "only_new": 196,
+        "only_base": 72,
+        "units": 736,
+        "p": 1.9478855131653262e-14
+      },
+      "verdict": "real gain"
+    },
+    {
+      "vs": "own untrained base",
+      "vs_spec": "qwen-base:dev-base",
+      "subset": "all",
+      "n_items": 1490,
+      "n_questions": 542,
+      "base_score": 17.57739179114005,
+      "new_score": 47.69093089382456,
+      "gap": 30.113539102684513,
+      "ci_low": 21.125427843882132,
+      "ci_high": 39.53943682444223,
+      "ahead": 5000,
+      "B": 5000,
+      "closer": {
+        "new_closer": 370,
+        "base_closer": 172,
+        "ties": 0,
+        "n_groups": 542,
+        "win_rate": 0.6826568265682657,
+        "p": 1.1442383850480067e-17
+      },
+      "mcnemar_top1": {
+        "only_new": 363,
+        "only_base": 149,
+        "units": 1490,
+        "p": 1.214809572478065e-21
+      },
+      "verdict": "real gain"
+    }
+  ],
+  "worth_n_pop": {
+    "new": {
+      "n_items": 754,
+      "mean_model_tvd": 0.176237231893352,
+      "aggregate_n": 9.447617027643712,
+      "median_item_n": 12.583790194907095
+    },
+    "frontier": {
+      "n_items": 754,
+      "mean_model_tvd": 0.1671249442379213,
+      "aggregate_n": 10.510168106242213,
+      "median_item_n": 15.795887968401836
+    }
+  },
+  "by_dataset_vs_frontier": [
+    {
+      "dataset": "MoralMachine",
+      "rows": 54,
+      "questions": 48,
+      "frontier": -72.6498732454536,
+      "new": 23.107953978073603,
+      "gap": 95.75782722352722
+    },
+    {
+      "dataset": "Jester",
+      "rows": 16,
+      "questions": 16,
+      "frontier": 8.66405283574784,
+      "new": 38.70970638672736,
+      "gap": 30.045653550979523
+    },
+    {
+      "dataset": "LatinoBarometro",
+      "rows": 124,
+      "questions": 33,
+      "frontier": 22.77412241754017,
+      "new": 51.20400545811963,
+      "gap": 28.429883040579462
+    },
+    {
+      "dataset": "DICES",
+      "rows": 46,
+      "questions": 46,
+      "frontier": 75.84351706570186,
+      "new": 90.48383175262202,
+      "gap": 14.640314686920163
+    },
+    {
+      "dataset": "OSPsychMGKT",
+      "rows": 54,
+      "questions": 32,
+      "frontier": 60.279607431202,
+      "new": 67.62444323687454,
+      "gap": 7.344835805672538
+    },
+    {
+      "dataset": "NumberGame",
+      "rows": 53,
+      "questions": 53,
+      "frontier": 19.775776213766566,
+      "new": 16.002984769491494,
+      "gap": -3.7727914442750716
+    },
+    {
+      "dataset": "OpinionQA",
+      "rows": 251,
+      "questions": 52,
+      "frontier": 75.60285887389831,
+      "new": 68.28651236266423,
+      "gap": -7.316346511234087
+    },
+    {
+      "dataset": "WisdomOfCrowds",
+      "rows": 12,
+      "questions": 12,
+      "frontier": 70.39908592762642,
+      "new": 57.45225210883521,
+      "gap": -12.946833818791205
+    },
+    {
+      "dataset": "Choices13k",
+      "rows": 51,
+      "questions": 51,
+      "frontier": 34.86813356938994,
+      "new": 20.37559732776649,
+      "gap": -14.492536241623451
+    },
+    {
+      "dataset": "Afrobarometer",
+      "rows": 213,
+      "questions": 25,
+      "frontier": 70.36027155904549,
+      "new": 55.262286835748796,
+      "gap": -15.09798472329669
+    },
+    {
+      "dataset": "TISP",
+      "rows": 55,
+      "questions": 11,
+      "frontier": 43.89756780987848,
+      "new": 28.499202283403644,
+      "gap": -15.398365526474837
+    },
+    {
+      "dataset": "ESS",
+      "rows": 218,
+      "questions": 18,
+      "frontier": 74.21023210173209,
+      "new": 56.909101988679154,
+      "gap": -17.301130113052935
+    },
+    {
+      "dataset": "OSPsychBig5",
+      "rows": 30,
+      "questions": 6,
+      "frontier": 60.17478259490846,
+      "new": 42.69384361123847,
+      "gap": -17.480938983669986
+    },
+    {
+      "dataset": "GlobalOpinionQA",
+      "rows": 44,
+      "questions": 40,
+      "frontier": 62.52942575470825,
+      "new": 42.92118821215897,
+      "gap": -19.608237542549283
+    },
+    {
+      "dataset": "OSPsychRWAS",
+      "rows": 1,
+      "questions": 1,
+      "frontier": 73.8756032225288,
+      "new": 53.579542182811224,
+      "gap": -20.29606103971757
+    },
+    {
+      "dataset": "ChaosNLI",
+      "rows": 49,
+      "questions": 49,
+      "frontier": 63.56318374439263,
+      "new": 42.71147141343729,
+      "gap": -20.851712330955344
+    },
+    {
+      "dataset": "ISSP",
+      "rows": 189,
+      "questions": 43,
+      "frontier": 52.131641646749955,
+      "new": 28.370775006673515,
+      "gap": -23.76086664007644
+    },
+    {
+      "dataset": "OSPsychMACH",
+      "rows": 30,
+      "questions": 6,
+      "frontier": -7.4129746373299925,
+      "new": -36.999970158866624,
+      "gap": -29.586995521536632
+    }
+  ],
+  "notes": [],
+  "cost_latency": {
+    "new": {
+      "cost_per_1k": 0.2571427751677852,
+      "p50_latency": 2.0410718750008527,
+      "p95_latency": 3.831778745349401,
+      "parse_ok": 1.0,
+      "n": 1490,
+      "results_file": "results/simbench/crowdcast__dev-v1__150011.jsonl"
+    },
+    "claude-opus-5-5:dev": {
+      "cost_per_1k": 4.806663087248322,
+      "p50_latency": 2.405974416499703,
+      "p95_latency": 3.667426925299968,
+      "parse_ok": 1.0,
+      "n": 1490,
+      "results_file": "results/simbench/claude-opus-5-5__dev__142204.jsonl"
+    },
+    "claude-sonnet-5-5:dev": {
+      "cost_per_1k": 1.1190161073825502,
+      "p50_latency": 1.269899249999071,
+      "p95_latency": 2.345530206399142,
+      "parse_ok": 0.9993288590604027,
+      "n": 1490,
+      "results_file": "results/simbench/claude-sonnet-5-5__dev__142204.jsonl"
+    },
+    "claude-haiku-5-5:dev": {
+      "cost_per_1k": 0.07886691275167786,
+      "p50_latency": 0.7607487294990278,
+      "p95_latency": 2.9801954312499213,
+      "parse_ok": 1.0,
+      "n": 1490,
+      "results_file": "results/simbench/claude-haiku-5-5__dev__142204.jsonl"
+    },
+    "qwen-base:dev-base": {
+      "cost_per_1k": 0.15559872483221476,
+      "p50_latency": 1.9783659579989035,
+      "p95_latency": 4.73322945900145,
+      "parse_ok": 1.0,
+      "n": 1490,
+      "results_file": "results/simbench/qwen-base__dev-base__141331.jsonl"
+    }
+  }
+}

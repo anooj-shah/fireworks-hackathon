@@ -1,4 +1,5 @@
 """Create + upload SimBench SFT datasets to Fireworks via the management API."""
+import os
 import sys
 
 import requests
@@ -8,7 +9,7 @@ sys.path.insert(0, ".")
 load_dotenv()
 from simbench.fireworks_client import get_api_key
 
-ACCOUNT_ID = "thisisanooj"
+ACCOUNT_ID = os.environ["FIREWORKS_ACCOUNT_ID"]  # your own Fireworks account id (set in .env)
 BASE = f"https://api.fireworks.ai/v1/accounts/{ACCOUNT_ID}/datasets"
 key = get_api_key()
 headers_json = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}

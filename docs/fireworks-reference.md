@@ -1,6 +1,6 @@
 # Fireworks reference (as of 2026-11-02)
 
-[V] = verified in docs.fireworks.ai, fireworks.ai or the judge's working code. [U] = unverified. Raw research with every source URL: `research/fireworks-howto-raw.md`. Docs index: https://docs.fireworks.ai/llms.txt. If a command fails, check there rather than trusting memory.
+[V] = verified in docs.fireworks.ai, fireworks.ai or the judge's working code. [U] = unverified. Docs index: https://docs.fireworks.ai/llms.txt. If a command fails, check there rather than trusting memory.
 
 ## 0. Which path for what
 | Need | Use | Time / cost |

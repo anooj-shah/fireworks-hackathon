@@ -7,10 +7,18 @@
 - Cluster bootstrap: resample *groups* (row "group" field, falling back to item id) with replacement,
   B times. Gap = mean(new item score) - mean(base item score) over all items in the sampled groups.
   Reports the 95% CI and how many resamples favoured the new system.
-A gain is "real" when McNemar p < 0.05 AND the CI excludes 0 (the judge's sample uses this rule).
+- "Closer" test (exact, per question): for each group, which system has the higher mean item score
+  (for SimBench: which is closer to the real answer distribution). Two-sided binomial test on groups where they
+  differ. This is the paired test that matches a distribution metric; McNemar on top-answer match ignores the
+  spread, so it is reported but not part of the verdict.
+A gain is "real" when the bootstrap CI excludes 0 AND the closer test has p < 0.05, in the same direction
+(this rule was fixed before any dev or test score existed).
+
+Subsets: --subset pop|grouped|all (by id prefix) and --survey-only (opinion-survey datasets, looked up by id in
+data/dev.jsonl + data/test.jsonl).
 
 Usage:
-  .venv/bin/python eval/stats.py --task <t> --base <model>:<label> --new <model>:<label> [--new ...]
+  .venv/bin/python eval/stats.py --task <t> --base <model>:<label> --new <model>:<label> [--new ...] [--subset pop] [--survey-only]
 Run specs refer to the latest summary row for that (model, label) in results/<task>/summary.jsonl.
 Writes results/<task>/stats.json and prints a markdown table.
 """
@@ -64,6 +72,50 @@ def mcnemar(base, new, ids, thr):
             "p": binom_two_sided(only_new, only_new + only_base)}
 
 
+SURVEY_DATASETS = {"Afrobarometer", "ESS", "ISSP", "LatinoBarometro", "OpinionQA", "GlobalOpinionQA", "TISP",
+                   "ConspiracyCorr"}
+
+
+def dataset_of_ids():
+    out = {}
+    for f in ("dev.jsonl", "test.jsonl"):
+        path = ROOT / "data" / f
+        if path.exists():
+            for line in open(path):
+                it = json.loads(line)
+                out[it["id"]] = it.get("dataset")
+    return out
+
+
+def filter_ids(ids, subset, survey_only):
+    if subset != "all":
+        ids = [i for i in ids if i.startswith(subset + "-")]
+    if survey_only:
+        ds = dataset_of_ids()
+        ids = [i for i in ids if ds.get(i) in SURVEY_DATASETS]
+    return ids
+
+
+def closer_test(base, new, ids):
+    """Per group: does `new` have a higher mean item score than `base`? Exact two-sided binomial on non-ties."""
+    groups = {}
+    for i in ids:
+        g = str(base[i].get("group") or new[i].get("group") or i)
+        groups.setdefault(g, []).append(i)
+    new_closer = base_closer = ties = 0
+    for items in groups.values():
+        d = sum(new[i].get("score", 0) - base[i].get("score", 0) for i in items) / len(items)
+        if d > 1e-12:
+            new_closer += 1
+        elif d < -1e-12:
+            base_closer += 1
+        else:
+            ties += 1
+    n = new_closer + base_closer
+    return {"new_closer": new_closer, "base_closer": base_closer, "ties": ties, "n_groups": len(groups),
+            "win_rate": new_closer / n if n else 0.5, "p": binom_two_sided(new_closer, n)}
+
+
 def cluster_bootstrap(base, new, ids, B=5000, seed=42):
     groups = {}
     for i in ids:
@@ -89,32 +141,45 @@ def main():
     ap.add_argument("--new", required=True, action="append", help="model:label of a variant (repeatable)")
     ap.add_argument("--pass-threshold", type=float, default=1.0)
     ap.add_argument("-B", type=int, default=5000)
+    ap.add_argument("--subset", default="all", choices=["all", "pop", "grouped"])
+    ap.add_argument("--survey-only", action="store_true", help="only opinion-survey datasets (see SURVEY_DATASETS)")
     a = ap.parse_args()
+    tag = a.subset + ("-survey" if a.survey_only else "")
 
     base, brow = load_run(a.task, a.base)
     out = []
     for spec in a.new:
         new, nrow = load_run(a.task, spec)
-        ids = sorted(set(base) & set(new))
-        missing = len(set(base) ^ set(new))
+        ids = filter_ids(sorted(set(base) & set(new)), a.subset, a.survey_only)
+        missing = len(filter_ids(sorted(set(base) ^ set(new)), a.subset, a.survey_only))
+        if not ids:
+            raise SystemExit(f"no paired items for {spec} in subset {tag}")
         m = mcnemar(base, new, ids, a.pass_threshold)
         bs = cluster_bootstrap(base, new, ids, a.B)
-        real = m["p"] < 0.05 and (bs["ci_low"] > 0 or bs["ci_high"] < 0)
-        out.append({"base": a.base, "new": spec, "base_score": brow["score"], "new_score": nrow["score"],
-                    "mcnemar": m, "bootstrap": bs, "unpaired_ids": missing, "significant": real})
+        ct = closer_test(base, new, ids)
+        ci_dir = 1 if bs["ci_low"] > 0 else (-1 if bs["ci_high"] < 0 else 0)
+        ct_dir = 1 if ct["new_closer"] > ct["base_closer"] else -1
+        real = ci_dir != 0 and ct["p"] < 0.05 and ci_dir == ct_dir
+        base_mean = sum(base[i].get("score", 0) for i in ids) / len(ids)
+        new_mean = sum(new[i].get("score", 0) for i in ids) / len(ids)
+        out.append({"base": a.base, "new": spec, "subset": tag, "base_score": base_mean, "new_score": new_mean,
+                    "mcnemar_top1": m, "closer": ct, "bootstrap": bs, "unpaired_ids": missing, "significant": real})
 
-    path = ROOT / "results" / a.task / "stats.json"
+    path = ROOT / "results" / a.task / ("stats.json" if tag == "all" else f"stats__{tag}.json")
     path.write_text(json.dumps(out, indent=2))
     print(f"wrote {path}\n")
-    print("| Variant vs " + a.base + " | Gap | 95% CI (cluster bootstrap) | Ahead in | McNemar only-new / only-base | p | Verdict |")
-    print("|---|---|---|---|---|---|---|")
+    print(f"Subset: {tag}. Scores are SimBench S/100 means over the paired items in this subset.\n")
+    print("| Variant vs " + a.base + " | Base | New | Gap | 95% CI (cluster bootstrap) | Ahead in | "
+          "Closer: new / base (questions) | p | Top-1 McNemar only-new / only-base (p) | Verdict |")
+    print("|---|---|---|---|---|---|---|---|---|---|")
     for o in out:
-        m, bs = o["mcnemar"], o["bootstrap"]
+        m, bs, ct = o["mcnemar_top1"], o["bootstrap"], o["closer"]
         verdict = "real gain" if o["significant"] and bs["gap"] > 0 else (
             "real loss" if o["significant"] else "could be luck")
-        print(f"| {o['new']} | {bs['gap']:+.3f} | [{bs['ci_low']:+.3f}, {bs['ci_high']:+.3f}] | "
-              f"{bs['ahead']}/{bs['B']} | {m['only_new']} / {m['only_base']} ({m['units']} units) | "
-              f"{m['p']:.2g} | {verdict} |")
+        print(f"| {o['new']} | {o['base_score']:.3f} | {o['new_score']:.3f} | {bs['gap']:+.3f} | "
+              f"[{bs['ci_low']:+.3f}, {bs['ci_high']:+.3f}] | {bs['ahead']}/{bs['B']} | "
+              f"{ct['new_closer']} / {ct['base_closer']} ({ct['win_rate']:.0%}) | {ct['p']:.2g} | "
+              f"{m['only_new']} / {m['only_base']} ({m['p']:.2g}) | {verdict} |")
         if o["unpaired_ids"]:
             print(f"  ! {o['unpaired_ids']} ids not present in both runs (excluded)")
 

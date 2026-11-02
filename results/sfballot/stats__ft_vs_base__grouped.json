@@ -1,0 +1,34 @@
+[
+  {
+    "base": "qwen-base:sfballot-base",
+    "new": "ft-qwen:sfballot-q36-3k-1e4",
+    "subset": "grouped",
+    "base_score": 0.015728277403971435,
+    "new_score": 0.2485806957759567,
+    "mcnemar_top1": {
+      "only_new": 1,
+      "only_base": 5,
+      "units": 209,
+      "p": 0.21875
+    },
+    "closer": {
+      "new_closer": 12,
+      "base_closer": 7,
+      "ties": 0,
+      "n_groups": 19,
+      "win_rate": 0.631578947368421,
+      "p": 0.359283447265625
+    },
+    "bootstrap": {
+      "gap": 0.23285241837198525,
+      "ci_low": -0.13788833011906135,
+      "ci_high": 0.6050539052641095,
+      "ahead": 4475,
+      "B": 5000,
+      "n_groups": 19,
+      "n_items": 209
+    },
+    "unpaired_ids": 0,
+    "significant": false
+  }
+]

@@ -1,0 +1,34 @@
+[
+  {
+    "base": "qwen-base:twin2k-base",
+    "new": "ft-qwen:twin2k-q36-3k-1e4",
+    "subset": "all",
+    "base_score": 0.07749812656567717,
+    "new_score": 0.20172439761812852,
+    "mcnemar_top1": {
+      "only_new": 236,
+      "only_base": 140,
+      "units": 977,
+      "p": 8.443662043049072e-07
+    },
+    "closer": {
+      "new_closer": 248,
+      "base_closer": 170,
+      "ties": 6,
+      "n_groups": 424,
+      "win_rate": 0.5933014354066986,
+      "p": 0.00015922930740152886
+    },
+    "bootstrap": {
+      "gap": 0.12422627105245136,
+      "ci_low": 0.05816853509561386,
+      "ci_high": 0.19363187157078726,
+      "ahead": 4999,
+      "B": 5000,
+      "n_groups": 424,
+      "n_items": 977
+    },
+    "unpaired_ids": 0,
+    "significant": true
+  }
+]

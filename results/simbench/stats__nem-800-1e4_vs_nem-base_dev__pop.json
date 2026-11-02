@@ -1,0 +1,34 @@
+[
+  {
+    "base": "nem-base:dev-base",
+    "new": "ft-nem:nem-800-1e4",
+    "subset": "pop",
+    "base_score": 0.24891191140272884,
+    "new_score": 0.35193434273677815,
+    "mcnemar_top1": {
+      "only_new": 142,
+      "only_base": 72,
+      "units": 754,
+      "p": 1.9618207747874863e-06
+    },
+    "closer": {
+      "new_closer": 280,
+      "base_closer": 194,
+      "ties": 64,
+      "n_groups": 538,
+      "win_rate": 0.5907172995780591,
+      "p": 9.075311864203739e-05
+    },
+    "bootstrap": {
+      "gap": 0.1030224313340493,
+      "ci_low": 0.052346930285419084,
+      "ci_high": 0.15692084080557495,
+      "ahead": 5000,
+      "B": 5000,
+      "n_groups": 538,
+      "n_items": 754
+    },
+    "unpaired_ids": 0,
+    "significant": true
+  }
+]

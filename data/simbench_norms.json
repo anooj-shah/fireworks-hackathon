@@ -4,6 +4,9 @@
   "grouped/ISSP": 0.3517108150213927,
   "grouped/LatinoBarometro": 0.24706643249734395,
   "grouped/OpinionQA": 0.34518180192922965,
+  "grouped/Polls2026": 0.2529023854766429,
+  "grouped/SFBallot": 0.1453433905259179,
+  "grouped/Twin2K": 0.2706094425027231,
   "pop/Afrobarometer": 0.43221455380589896,
   "pop/ChaosNLI": 0.3836666666666667,
   "pop/Choices13k": 0.1748573201131233,
@@ -22,6 +25,9 @@
   "pop/OSPsychMGKT": 0.33921281222663,
   "pop/OSPsychRWAS": 0.42088498508739286,
   "pop/OpinionQA": 0.36727957466057953,
+  "pop/Polls2026": 0.21194348006229194,
+  "pop/SFBallot": 0.1356248263193176,
   "pop/TISP": 0.30257647685808775,
+  "pop/Twin2K": 0.2739255176013159,
   "pop/WisdomOfCrowds": 0.5574116514549817
 }
