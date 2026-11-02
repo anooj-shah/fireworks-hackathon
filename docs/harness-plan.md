@@ -72,3 +72,8 @@ The fine-tune alone does not beat Opus. The brief allows "a smarter harness, or 
 - **Outcome (15:24):** v2 dev Pop 43.15 vs v1 41.12 = +2.03 < 3, so **v2 is not run on test; v1 stands.**
   - v2 dev Grouped 59.18 (v1 54.42), all 51.07 (v1 47.69), weights F 0.50 / O 0.30 / M 0.20.
   - Files: `results/simbench/crowdcast_fit__v2.json`, `crowdcast__dev-v2__152351.jsonl`.
+- **15:36: v2 was run on test anyway** by another team session, outside the rule above.
+  - Treat it as a **second look at the test set**. v1's test card stays alongside.
+  - It used the frozen dev weights (`crowdcast_fit__v2.json`) and reproduces exactly (`reproduce__crowdcast__test-v2.json`).
+  - **The verdict doesn't change.** Test Pop 47.1 vs Opus 44.7: +2.3 (95% −0.1 to +4.8), and Opus is closer on 1,138 vs 973 questions, so **can't tell apart**. Grouped −11.7 and all −4.3 are real losses.
+  - Card: `results/simbench/prove__crowdcast__test-v2__test.md`.

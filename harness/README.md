@@ -26,6 +26,11 @@ SimBench score (100 = matches real people, 0 = no better than an even split). Op
   - Pop: +1.2 points (95% range −1.1 to +3.6), but Opus is closer on more questions (1,149 vs 962, p = 5e-5). **"Can't be told apart"**, at **18× lower cost** ($0.258 vs $4.69 per 1k).
   - Demographic (Grouped) half: **real loss**, −13.7.
   - Overall: **real loss**, −5.8.
+- **v2** (Nemotron 3.5 Super fine-tune as F, weights frozen on dev).
+  - Run on test at 15:36, **outside the pre-registered rule** (its dev gain was +2.03 < 3), so treat it as a second look at the test set.
+  - Test Pop **47.1** vs Opus 44.7: +2.3 (95% −0.1 to +4.8), Opus closer on 1,138 vs 973 questions. **Still "can't be told apart"**; a real gain over Sonnet.
+  - Card: `results/simbench/prove__crowdcast__test-v2__test.md`.
+  - The Nemotron fine-tune alone scores test Pop 38.1 (`prove__ft-nem__nem-800-1e4-test__test.md`).
 - **Crowdcast vs its own parts** (cluster bootstrap + closer-to-real-people test):
   - SimBench test: **real gain** over the fine-tune (+11.2 Pop) and over DeepSeek alone (+10.2 Pop).
   - Twin-2K: **real gain** over the fine-tune (+15.2). Over DeepSeek alone: +4.7 on Pop is real, +1.3 overall can't be told apart.
