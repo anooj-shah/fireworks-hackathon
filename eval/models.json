@@ -15,6 +15,10 @@
   "qwen3-4b": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
               "model": "accounts/alexxandriayip-mb1bl/deployments/wcgxgscb", "price_in": 0.1, "price_out": 0.1,
               "closed": false, "params": {"temperature": 0}},
+  "qwen3-4b-ft": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
+              "model": "accounts/alexxandriayip-mb1bl/deployments/nmbvilrs", "price_in": 0.1, "price_out": 0.1,
+              "closed": false, "base_model": "accounts/fireworks/models/qwen3-4b-instruct-2507",
+              "params": {"temperature": 0}},
 
   "fw-small": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
                "model": "accounts/fireworks/models/FILL_ME", "price_in": null, "price_out": null, "params": {"temperature": 0}},
