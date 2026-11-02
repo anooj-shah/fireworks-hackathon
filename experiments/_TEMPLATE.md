@@ -26,6 +26,8 @@
 
 Bootstrap test (`eval/stats.py`, clustered by question): gain <x>, 95% CI [<lo>, <hi>], p = <p>.
 
+Step 6 proof card (`eval/prove_gain.py --new <model>:<label> --split dev`): `results/simbench/prove__<model>__<label>__dev.md`. Verdict vs Claude Opus 5.5 on Pop: <real gain / real loss / can't tell apart>, gap <x> [<lo>, <hi>].
+
 ## Notes
 - What worked / didn't. Surprises. Failures and errors (with counts).
 - 2–3 example outputs, base vs fine-tuned, on the same question (copy them from the results files).
