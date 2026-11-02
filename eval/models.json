@@ -22,6 +22,14 @@
                "model": "accounts/fireworks/models/FILL_ME", "price_in": null, "price_out": null, "params": {"temperature": 0}},
   "fw-large": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
                "model": "accounts/fireworks/models/FILL_ME", "price_in": null, "price_out": null, "params": {"temperature": 0}},
+  "fw-kimi-k3": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
+                 "model": "accounts/fireworks/models/kimi-k3", "price_in": 3.0, "price_out": 15.0, "params": {"temperature": 0, "reasoning_effort": "none"}},
+  "fw-glm-5p3": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
+                 "model": "accounts/fireworks/models/glm-5p3", "price_in": 1.40, "price_out": 4.40, "params": {"temperature": 0}},
+  "fw-qwen3p8-max": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
+                     "model": "accounts/fireworks/models/qwen3p8-max", "price_in": 2.0, "price_out": 6.0, "params": {"temperature": 0, "reasoning_effort": "none"}},
+  "fw-deepseek-v4p1-flash": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
+                             "model": "accounts/fireworks/models/deepseek-v4p1-flash", "price_in": 0.30, "price_out": 1.20, "params": {"temperature": 0, "reasoning_effort": "none"}},
   "fw-ft": {"base_url": "https://api.fireworks.ai/inference/v1", "api_key_env": "FIREWORKS_API_KEY",
             "model": "accounts/FILL_ACCOUNT/models/FILL_FT_MODEL", "price_in": null, "price_out": null, "params": {"temperature": 0}}
 }

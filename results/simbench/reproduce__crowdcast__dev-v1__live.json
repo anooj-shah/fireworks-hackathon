@@ -1,0 +1,28 @@
+{
+ "time": "2026-11-02T15:00:22",
+ "run": "crowdcast:dev-v1",
+ "mode": "live",
+ "live_members": {
+  "O": "fw-deepseek-v4p1-flash:hx-dev-repro"
+ },
+ "inputs_ok": true,
+ "weights": {
+  "F": 0.4,
+  "O": 0.4,
+  "M": 0.2,
+  "U": 0.0
+ },
+ "committed": {
+  "pop": 41.12219189652827,
+  "grouped": 54.420318399206906,
+  "all": 47.690930893824564
+ },
+ "reproduced": {
+  "pop": 40.721183694240736,
+  "grouped": 53.53728083018721,
+  "all": 47.05181959494986
+ },
+ "n_items": 1490,
+ "identical_O_answers": 0.3691275167785235,
+ "verdict": "LIVE RERUN: dev Pop 40.72 vs committed 41.12 (-0.40)"
+}

@@ -1,0 +1,28 @@
+{
+ "time": "2026-11-02T15:00:13",
+ "run": "crowdcast:dev-v1",
+ "mode": "exact",
+ "live_members": {},
+ "inputs_ok": true,
+ "weights": {
+  "F": 0.4,
+  "O": 0.4,
+  "M": 0.2,
+  "U": 0.0
+ },
+ "committed": {
+  "pop": 41.12219189652827,
+  "grouped": 54.420318399206906,
+  "all": 47.690930893824564
+ },
+ "reproduced": {
+  "pop": 41.12219189652828,
+  "grouped": 54.420318399206906,
+  "all": 47.690930893824564
+ },
+ "n_items": 1490,
+ "max_item_diff": 8.526512829121202e-14,
+ "max_regrade_diff_of_committed_output_text": 4.128451470464256e-06,
+ "reproduced_exactly": true,
+ "verdict": "REPRODUCED EXACTLY: crowdcast:dev-v1 pop 41.1222 / grouped 54.4203 / all 47.6909"
+}
