@@ -33,7 +33,7 @@ from training.utils.supervised import build_renderer  # noqa: E402
 from training.utils.tokenizers import load_tokenizer  # noqa: E402
 
 # serverless training sampler prices, USD per 1M tokens (prefill, sample), docs/fireworks-reference.md
-PRICES = {"qwen": (0.45, 1.335), "nem": (0.57, 1.44), "glm": (2.96, 7.41)}
+PRICES = {"qwen": (0.45, 1.335), "nem": (0.57, 1.44), "glm": (2.96, 7.41), "ds": (0.60, 3.60)}
 
 
 def main():

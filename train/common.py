@@ -38,6 +38,14 @@ BASES = {
         "renderer": "glm53_flash",
         "prefill": "<think></think>",
     },
+    "ds": {
+        "base_model": "accounts/fireworks/models/deepseek-v4p1-flash-1017",
+        "tokenizer": "deepseek-ai/DeepSeek-V4.1-Flash",
+        "renderer": "deepseek_v41",
+        # generation prompt ends "<｜Assistant｜><think>"; training targets render "<think></think>{answer}",
+        # so close the think block: thinking off, same format as training.
+        "prefill": "</think>",
+    },
 }
 
 
