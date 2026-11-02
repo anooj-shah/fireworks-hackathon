@@ -14,9 +14,11 @@ Add a row **before** you launch, then commit and push. The same base model is fi
 | Dylan | `q36-pop-1e4` | Qwen 3.6 35B A3B | `train_sft_pop3k.jsonl` (Pop only 3k) | 1e-4 / 1 / 16 / 16 | **failed** at step 171/188 (same outage). Rerun as `q36-pop-1e4-r2` |
 | Dylan | `nem-3k-1e4` | NVIDIA Nemotron 3.5 Super VL 120B | `train_sft_3k.jsonl` (mixed 3k) | 1e-4 / 1 / 16 / 16 | **stopped** at step ~5: ~27 s/step means it would finish ~16:10, too late. Replaced by `nem-800-1e4` |
 | Dylan | `nem-800-1e4` | NVIDIA Nemotron 3.5 Super VL 120B | first 800 rows of `train_sft_3k.jsonl` (`--max-examples 800`) | 1e-4 / 1 / 16 / 16 | launching 14:49 |
+| Dylan | `glm-800-1e4` | GLM 5.3 Flash | first 800 rows of `train_sft_3k.jsonl` | 1e-4 / 1 / 16 / 16; thinking off via empty `<think></think>` prefill (same as the training format) | launching 14:59 (post-freeze bonus, user-approved; likely lands after 15:15) |
 | Dylan | `q36-poph-1e4-r2` | Qwen 3.6 35B A3B | `train_sft_poph3k.jsonl` | 1e-4 / 1 / 16 / 16 | **stopped** at step ~10 (14:54): the pool slowed to ~40 s/step with 4 runs going, so it couldn't finish before 15:15; stopped to free capacity for `q36-3k-3e4` and `nem-800-1e4` |
 | Dylan | `q36-pop-1e4-r2` | Qwen 3.6 35B A3B | `train_sft_pop3k.jsonl` | 1e-4 / 1 / 16 / 16 | **stopped** at step ~10 (14:54): the pool slowed to ~40 s/step with 4 runs going, so it couldn't finish before 15:15; stopped to free capacity for `q36-3k-3e4` and `nem-800-1e4` |
 | Dylan | `q36-3k-3e4` | Qwen 3.6 35B A3B | `train_sft_3k.jsonl` (mixed 3k) | 3e-4 / 1 / 16 / 16 | launching 14:41 |
+| Dylan | `crowdcast` (harness, no training) | ensemble: `q36-3k-1e4` + one open serverless model (Kimi K3 / Qwen 3.8 Max / DeepSeek V4.1 Flash, thinking off) + survey memory (train-split lookup) + uniform | none (memory = `data/train.jsonl` only) | weights fit on dev Pop only; plan + rules `docs/harness-plan.md` | claimed 14:55; dev runs of the 3 open models launching. GLM 5.3 failed smoke (thinking-only) |
 
 **Base models available for serverless training** (IDs are verified, or come from `docs/fireworks-reference.md` §3):
 | Base | Fireworks ID | Key in `train/common.py` |
@@ -24,7 +26,7 @@ Add a row **before** you launch, then commit and push. The same base model is fi
 | Qwen 3.6 35B A3B (cheapest) | `accounts/fireworks/models/qwen3p6-35b-a3b` | `qwen` |
 | NVIDIA Nemotron 3.5 Super VL 120B (NVIDIA prize) | `accounts/fireworks/models/nvidia-nemotron-3p5-super-vl-120b-a12b-bf16` | `nem` |
 | Qwen 3.8 27B | `accounts/fireworks/models/qwen3p8-27b` | add it |
-| GLM 5.3 Flash | `accounts/fireworks/models/glm-5p3-flash` | add it |
+| GLM 5.3 Flash | `accounts/fireworks/models/glm-5p3-flash` | `glm` |
 | Others (Muse Glimmer 30B, DeepSeek V4.1 Flash…) | see `docs/fireworks-reference.md` §3 | add it |
 
 **Untrained baselines are shared.** Each base model's untrained score only needs to be measured once, with the exact settings below. If a committed `results/simbench/<base>-base__...` file on all of dev already exists for your base, reuse it in your report instead of re-scoring.
@@ -75,7 +77,7 @@ It prints two tests, and a gain counts as **real only when both agree**:
 
 It also prints McNemar on "top answer matches" for reference. That one ignores the spread, so it isn't part of the verdict. Other subsets: `--subset grouped`, `--subset all`, `--survey-only`.
 
-**Step 6 proof card (do this for every scored run; it's what the judges grade).** One command runs both tests against the frontier (Claude Opus 5.5), Sonnet, Haiku and your own untrained base, on Pop / Grouped / all, and adds measured cost and latency, "worth N real respondents" and a per-dataset win/loss table. How to read it and how to say it in the pitch: [`docs/prove-the-gain.md`](docs/prove-the-gain.md).
+**Proof card (do this for every scored run; it's what the judges grade).** One command runs both tests against the frontier (Claude Opus 5.5), Sonnet, Haiku and your own untrained base, on Pop (population-level questions) / Grouped (demographic-subgroup questions) / all, and adds measured cost and latency, "worth N real respondents" (how many real survey respondents the answer is as good as) and a per-dataset win/loss table. How to read it and how to say it in the pitch: [`docs/prove-the-gain.md`](docs/prove-the-gain.md).
 ```bash
 ../.venv/bin/python eval/prove_gain.py --new <model>:<label> --split dev     # writes results/simbench/prove__<model>__<label>__dev.md
 ```

@@ -9,7 +9,6 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-COOKBOOK = ROOT / "cookbook" / "training"
 sys.path.insert(0, str(ROOT / "cookbook"))   # makes `training.*` importable
 sys.path.insert(0, str(ROOT / "eval"))       # makes `tasks.simbench` importable
 
@@ -29,6 +28,15 @@ BASES = {
         "base_model": "accounts/fireworks/models/nvidia-nemotron-3p5-super-vl-120b-a12b-bf16",
         "tokenizer": "nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-BF16",
         "renderer": "nemotron35_vl_disable_thinking",
+    },
+    # GLM 5.3 Flash: the renderer has no thinking-off variant. Training targets render as
+    # "<|assistant|><think></think>{answer}" (empty reasoning), so sampling prefills the same empty
+    # think block for both the untrained base and the fine-tune: thinking off, same format as training.
+    "glm": {
+        "base_model": "accounts/fireworks/models/glm-5p3-flash",
+        "tokenizer": "zai-org/GLM-5.3-Flash",
+        "renderer": "glm53_flash",
+        "prefill": "<think></think>",
     },
 }
 

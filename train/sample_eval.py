@@ -6,15 +6,14 @@ grader as eval/run.py, and writes rows in the same format, so eval/stats.py work
 
   # untrained base model on dev
   .venv-train/bin/python train/sample_eval.py --base qwen --data data/dev.jsonl --label base
-  # a fine-tuned checkpoint (path from runs/<name>/train.log)
-  # a fine-tuned run, after training finished (WORKS): load its final DCP checkpoint into a fresh
+  # a fine-tuned run, after training finished: load its final training checkpoint into a fresh
   # LoRA session, save a sampler snapshot there, sample, then close that session.
-  # The ref is printed in runs/<name>/train.log ("init_from_checkpoint='<account>/<run-id>/<ckpt>'");
+  # The checkpoint ref is printed in runs/<name>/train.log ("init_from_checkpoint='<account>/<run-id>/<ckpt>'");
   # the final checkpoint is step-<total steps>.
   .venv-train/bin/python train/sample_eval.py --base qwen --from-checkpoint <account>/run-<id>/step-188 \
       --data data/dev.jsonl --label q36-3k-1e4
-  # (--model-path accounts/<a>/trainingSessions/<ts>/checkpoints/<name> returned 400 "Invalid serverless
-  #  training model" from a separate process on 2026-11-02, so use --from-checkpoint.)
+  # Note: --model-path accounts/<a>/trainingSessions/<ts>/checkpoints/<name> returned 400 "Invalid serverless
+  # training model" when used from a separate process, so use --from-checkpoint for finished runs.
 """
 import argparse
 import json
@@ -34,7 +33,7 @@ from training.utils.supervised import build_renderer  # noqa: E402
 from training.utils.tokenizers import load_tokenizer  # noqa: E402
 
 # serverless training sampler prices, USD per 1M tokens (prefill, sample), docs/fireworks-reference.md
-PRICES = {"qwen": (0.45, 1.335), "nem": (0.57, 1.44)}
+PRICES = {"qwen": (0.45, 1.335), "nem": (0.57, 1.44), "glm": (2.96, 7.41)}
 
 
 def main():
@@ -42,7 +41,7 @@ def main():
     p.add_argument("--base", choices=sorted(BASES), required=True)
     p.add_argument("--model-path", default=None, help="checkpoint path; omit to sample the untrained base")
     p.add_argument("--from-checkpoint", default=None,
-                   help="trainer-side DCP ref <account>/<run-id>/<step> (see runs/<name>/train.log); "
+                   help="training checkpoint ref <account>/<run-id>/<step> (see runs/<name>/train.log); "
                         "loaded into a fresh LoRA session, then sampled. Use this for finished runs")
     p.add_argument("--lora-rank", type=int, default=16, help="must match training (train_sft.py default 16)")
     p.add_argument("--lora-alpha", type=int, default=32, help="must match training (sft_loop default 32)")
@@ -77,7 +76,7 @@ def main():
 
     def one(i, item):
         try:
-            prompt = renderer.build_generation_prompt(task.build_messages(item))
+            prompt = renderer.build_generation_prompt(task.build_messages(item), prefill=b.get("prefill"))
             t0 = time.perf_counter()
             out = sampler.sample(prompt=prompt, num_samples=1, sampling_params=params).result()
             lat = time.perf_counter() - t0
