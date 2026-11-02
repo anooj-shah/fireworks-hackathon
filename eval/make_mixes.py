@@ -6,8 +6,10 @@ personas (3,091 rows, 46% of train). The default 3k file inherits that share. Th
 whether question variety beats persona repetition.
 
   data/train_sft_pop3k.jsonl   3,000 Pop rows only
-  data/train_sft_poph3k.jsonl  Grouped capped at 10 personas per question (47 x 10 = 470) + 2,530 Pop rows
+  data/train_sft_poph3k.jsonl  ("poph" = Pop + capped Grouped) Grouped capped at 10 personas per question
+                               (47 x 10 = 470) + 2,530 Pop rows
 
+Pop = questions about a whole population; Grouped = questions asked of one demographic subgroup.
 Same chat format and prompt as eval (tasks/simbench.build_messages / target). Seeded, so reruns are identical.
 """
 import json

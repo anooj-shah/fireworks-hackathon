@@ -20,7 +20,7 @@ Skipped: multi-select (MAVR/MAHR), sliders, text/number entry, descriptive block
 (multiple-price-list econ games), the two probability-matching "roll/shuffle #k" matrices (QID198, QID203),
 items with empty text, and any cell with <100 valid answers.
 
-Rows:
+Rows ("pop" = whole panel; "grouped" = one demographic subgroup, here an age bucket):
   pop      one per question, distribution over all participants who answered.
   grouped  question x age bucket (QID13: 18-29 / 30-49 / 50-64 / 65+), OpinionQA-style persona, cells with
            >=100 respondents, Demographics block excluded. To keep the run small, only a deterministic

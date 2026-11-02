@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""Harness: soften a saved run's answers toward an even split, then re-grade. No new model calls.
+"""Post-process a saved run: blend each predicted answer split toward an even split, then re-grade. No new model calls.
 
-    q' = (1 - lam) * q + lam * uniform
+    q' = (1 - lam) * q + lam * uniform      (lam = the softening weight, set with --lam)
 
-Why: models (ours and Claude) are often overconfident where people disagree. The SimBench score punishes that.
-lam is chosen on dev ONLY (--fit), separately for each model so every system gets its own best setting, then
-the same lam is applied to that model's test run. Unparseable outputs stay a uniform guess, as in the grader.
+Why: models (ours and Claude) are often overconfident where people disagree, and the SimBench score punishes that.
+The softening weight is chosen on the dev split only (--fit), separately for each model, then the same weight is
+applied to that model's test run. Unparseable outputs stay a uniform guess, as in the grader.
+Pop = population-level survey questions (the half used for fitting).
 
 Usage:
-  # pick lam on dev Pop for one run (prints the grid, writes nothing)
+  # pick the softening weight on dev Pop for one run (prints the grid, writes nothing)
   .venv/bin/python eval/soften.py --fit --run claude-haiku-5-5:dev
-  # apply a lam to a run (dev or test) -> new results file + summary row, label "<label>+soft<lam>"
+  # apply a softening weight to a run (dev or test) -> new results file + summary row, label "<label>+soft<lam>"
   .venv/bin/python eval/soften.py --run claude-haiku-5-5:test --lam 0.1
 """
 import argparse
@@ -50,8 +51,8 @@ def soften(item, rec, lam):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", required=True, help="model:label from results/simbench/summary.jsonl")
-    ap.add_argument("--lam", type=float)
-    ap.add_argument("--fit", action="store_true", help="print dev-Pop score for each lam in the grid (dev runs only)")
+    ap.add_argument("--lam", type=float, help="softening weight in [0, 1] (0 = unchanged, 1 = uniform)")
+    ap.add_argument("--fit", action="store_true", help="print the dev Pop score for each softening weight in the grid (dev runs only)")
     a = ap.parse_args()
 
     row = find_run(a.run)

@@ -5,8 +5,7 @@ Run with the training venv:
   .venv-train/bin/python train/train_sft.py --name q36-3k-1e4 --base qwen --data data/train_sft_3k.jsonl
 
 Logs go to runs/<name>/ (train.log has the training session id + checkpoint names).
-Scoreable (sampler) checkpoints are saved every --sampler-every steps and at the end;
-score them with train/sample_eval.py.
+Sampler checkpoints are saved every --sampler-every steps and at the end; score them with train/sample_eval.py.
 """
 import argparse
 import logging
@@ -65,12 +64,12 @@ def main():
         epochs=a.epochs,
         batch_size=a.batch_size,
         learning_rate=a.lr,
-        dcp_save_interval=every,       # reloadable checkpoints at each sampler save, so --from-checkpoint can score a run that dies mid-way
+        dcp_save_interval=every,       # full training checkpoints saved with each sampler save, so --from-checkpoint can still score a run that dies mid-way
         sampler_save_interval=every,
         save_final_checkpoint=True,
         output_model_id=None,          # promote later, only for the winner
         close_session_on_exit=False,   # keep checkpoints available for scoring
-        eval_auto_carveout=False,      # we score on our own dev set
+        eval_auto_carveout=False,      # we score on our own dev split instead
         wandb=WandBConfig(entity=None, project="simbench-sft"),
     )
     out = sft_loop.main(cfg)

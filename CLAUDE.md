@@ -51,8 +51,8 @@ A 3k-example serverless LoRA run takes ~15 min.
 | `eval/tasks/simbench.py` | Official SimBench prompt + metric. **Don't edit** |
 | `eval/run.py`, `eval/stats.py`, `eval/frontier.py` | Closed-model scoring, significance tests, quality-vs-cost chart |
 | `eval/prep_simbench.py`, `eval/make_mixes.py` | Rebuild the split and the training mixes from raw SimBench |
-| `eval/worth_n.py` | "Worth N real respondents" calculation |
-| `eval/prove_gain.py`, `docs/prove-the-gain.md` | **Step 6 proof card**: both significance tests vs Opus / Sonnet / Haiku / own base, cost, latency, worth-N, per-dataset wins and losses. Run it on every scored model; the pitch quotes only the test card |
+| `eval/worth_n.py` | "Worth N real respondents" calculation (how many real survey respondents the model's answer is as good as) |
+| `eval/prove_gain.py`, `docs/prove-the-gain.md` | **Proof card**: both significance tests vs Opus / Sonnet / Haiku / own base, cost, latency, worth-N, per-dataset wins and losses. Run it on every scored model; the pitch quotes only the test card |
 | `train/` | `train_sft.py` (serverless LoRA SFT), `sample_eval.py` (score base or fine-tuned), `common.py` (base-model presets) |
 | `results/simbench/` | Every scored run: per-question `*.jsonl` + one row per run in `summary.jsonl` |
 | `docs/fireworks-reference.md` | Fireworks API / training / deployment reference |

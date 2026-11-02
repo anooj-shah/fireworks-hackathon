@@ -2,6 +2,7 @@
 """Build the SimBench train/test split.
 
 Source: data/raw/simbench/SimBench{Pop,Grouped}.csv (HF pitehu/SimBench, CC BY-NC-SA 4.0).
+"Pop" rows ask about a whole population; "Grouped" rows ask about one demographic subgroup.
 
 Split rule: by QUESTION TEXT, globally across both files. Every row that shares an
 `input_template` (all personas / waves of one question, in Pop *and* Grouped) lands on the
@@ -10,13 +11,13 @@ same side, so no test question is ever seen in training. Assignment is a determi
 Writes:
   data/test.jsonl        locked eval set (shuffled, seed 0, so --limit N is a random mix)
   data/dev.jsonl         same schema; questions with hash bucket in [test_frac, test_frac+dev_frac).
-                         Iterate harness/fine-tune ideas HERE, never on test.
+                         Tune prompts and fine-tuning choices HERE, never on test.
   data/train.jsonl       same schema, training side (excludes dev)
   data/train_sft.jsonl   chat-format SFT rows built with the SAME prompt as eval (tasks/simbench.py)
   data/split_manifest.json  counts + sha256 of test.jsonl
   data/simbench_norms.json  official per-dataset normalizers used by the grader
 
-If data/test.jsonl exists it is never rewritten: the script recomputes it and asserts the sha256 matches.
+If data/test.jsonl exists it is never rewritten (unless --force): the script recomputes it and asserts the sha256 matches.
 """
 import argparse
 import ast
@@ -60,7 +61,7 @@ def rows(subset, path):
         q = r.input_template
         yield {
             "id": f"{subset}-{idx}",
-            "group": qhash(q)[:12],  # cluster = question
+            "group": qhash(q)[:12],  # one id per question; used for the split and the bootstrap
             "subset": subset,
             "dataset": r.dataset_name,
             "persona": persona_text(r.group_prompt_template, r.group_prompt_variable_map),

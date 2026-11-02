@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Move outside-test-set runs out of results/simbench/ so the headline file stays SimBench-only.
+"""Move runs on the extra (non-SimBench) test sets out of results/simbench/ so its summary stays SimBench-only.
 
 train/sample_eval.py (and eval/run.py --task simbench) always write to results/simbench/. When you
-score one of the outside test sets (data/ext_*.jsonl), use a label that starts with the set's name,
+score one of the extra test sets (data/ext_*.jsonl), use a label that starts with the set's name,
 e.g. --label twin2k-<run> / polls2026-<run> / sfballot-<run>, then run:
 
   .venv/bin/python eval/move_ext_results.py

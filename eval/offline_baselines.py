@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""No-API feasibility analysis on SimBench (default: the dev/practice pile).
+"""No-API reference points on SimBench (default: data/dev.jsonl, the development split).
 
-Answers three questions before we spend money:
+Answers three questions without calling any model:
   1. How well does a no-AI lookup do?  (dataset average; nearest similar training questions)
   2. How much does overconfidence cost? (take the TRUE answer and make it sharper / one-hot)
   3. "Worth N real respondents": the poll size whose expected error matches each predictor.

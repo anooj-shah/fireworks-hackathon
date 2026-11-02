@@ -12,7 +12,7 @@
   differ. This is the paired test that matches a distribution metric; McNemar on top-answer match ignores the
   spread, so it is reported but not part of the verdict.
 A gain is "real" when the bootstrap CI excludes 0 AND the closer test has p < 0.05, in the same direction
-(rule fixed at 14:00, before any dev or test score existed).
+(this rule was fixed before any dev or test score existed).
 
 Subsets: --subset pop|grouped|all (by id prefix) and --survey-only (opinion-survey datasets, looked up by id in
 data/dev.jsonl + data/test.jsonl).

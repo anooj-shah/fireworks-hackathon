@@ -1,4 +1,4 @@
-"""Task template: copy to eval/tasks/<name>.py and fill in.
+"""Template for adding a new eval task: copy to eval/tasks/<name>.py and fill in.
 
 Test data: JSONL, one item per line, any fields you like (e.g. {"input": ..., "expected": ...}).
 """

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Task-agnostic eval harness. One code path for Fireworks and closed providers
+"""Task-agnostic evaluation runner. One code path for Fireworks and closed providers
 (any OpenAI-compatible chat API: Fireworks, OpenAI, Azure OpenAI v1), plus a native Anthropic
 path for registry entries with "provider": "anthropic" (Claude 5.5 models take effort via
 output_config, reject temperature, and count thinking toward max_tokens).
