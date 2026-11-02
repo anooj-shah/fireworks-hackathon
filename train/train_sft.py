@@ -65,7 +65,7 @@ def main():
         epochs=a.epochs,
         batch_size=a.batch_size,
         learning_rate=a.lr,
-        dcp_save_interval=0,
+        dcp_save_interval=every,       # reloadable checkpoints at each sampler save, so --from-checkpoint can score a run that dies mid-way
         sampler_save_interval=every,
         save_final_checkpoint=True,
         output_model_id=None,          # promote later, only for the winner

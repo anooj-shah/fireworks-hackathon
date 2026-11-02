@@ -10,9 +10,12 @@ Add a row **before** you launch, then commit and push. The same base model is fi
 | Person | Run name (≤17 chars) | Base model | Training data | LR / epochs / batch / LoRA rank / other | Status |
 |---|---|---|---|---|---|
 | Dylan | `q36-3k-1e4` | Qwen 3.6 35B A3B | `train_sft_3k.jsonl` (mixed 3k) | 1e-4 / 1 / 16 / 16 | scored 14:18: dev Pop 30.4 (base 10.1), report `experiments/q36-3k-1e4.md` |
-| Dylan | `q36-poph-1e4` | Qwen 3.6 35B A3B | `train_sft_poph3k.jsonl` (Pop + Grouped capped 10/question) | 1e-4 / 1 / 16 / 16 | training (launched 14:08, ETA ~14:35) |
-| Dylan | `q36-pop-1e4` | Qwen 3.6 35B A3B | `train_sft_pop3k.jsonl` (Pop only 3k) | 1e-4 / 1 / 16 / 16 | training (launched 14:08, ETA ~14:35) |
-| Dylan | `nem-3k-1e4` | NVIDIA Nemotron 3.5 Super VL 120B | `train_sft_3k.jsonl` (mixed 3k) | 1e-4 / 1 / 16 / 16 | launching 14:41 (after the 2:30 freeze; user-approved, disclosed; final if scored by 15:15) |
+| Dylan | `q36-poph-1e4` | Qwen 3.6 35B A3B | `train_sft_poph3k.jsonl` (Pop + Grouped capped 10/question) | 1e-4 / 1 / 16 / 16 | **failed** at step 178/188 (Fireworks outage 14:42, "no healthy upstream"); no final checkpoint. Rerun as `q36-poph-1e4-r2` |
+| Dylan | `q36-pop-1e4` | Qwen 3.6 35B A3B | `train_sft_pop3k.jsonl` (Pop only 3k) | 1e-4 / 1 / 16 / 16 | **failed** at step 171/188 (same outage). Rerun as `q36-pop-1e4-r2` |
+| Dylan | `nem-3k-1e4` | NVIDIA Nemotron 3.5 Super VL 120B | `train_sft_3k.jsonl` (mixed 3k) | 1e-4 / 1 / 16 / 16 | **stopped** at step ~5: ~27 s/step means it would finish ~16:10, too late. Replaced by `nem-800-1e4` |
+| Dylan | `nem-800-1e4` | NVIDIA Nemotron 3.5 Super VL 120B | first 800 rows of `train_sft_3k.jsonl` (`--max-examples 800`) | 1e-4 / 1 / 16 / 16 | launching 14:49 (post-freeze, user-approved; final if scored by 15:15) |
+| Dylan | `q36-poph-1e4-r2` | Qwen 3.6 35B A3B | `train_sft_poph3k.jsonl` | 1e-4 / 1 / 16 / 16 | launching 14:49 (rerun after outage) |
+| Dylan | `q36-pop-1e4-r2` | Qwen 3.6 35B A3B | `train_sft_pop3k.jsonl` | 1e-4 / 1 / 16 / 16 | launching 14:49 (rerun after outage) |
 | Dylan | `q36-3k-3e4` | Qwen 3.6 35B A3B | `train_sft_3k.jsonl` (mixed 3k) | 3e-4 / 1 / 16 / 16 | launching 14:41 (after the 2:30 freeze; user-approved, disclosed; final if scored by 15:15) |
 
 **Base models available for serverless training** (IDs are verified, or come from `docs/fireworks-reference.md` §3):
@@ -72,6 +75,12 @@ It prints two tests, and a gain counts as **real only when both agree**:
 
 It also prints McNemar on "top answer matches" for reference. That one ignores the spread, so it isn't part of the verdict. Other subsets: `--subset grouped`, `--subset all`, `--survey-only`.
 
+**Step 6 proof card (do this for every scored run; it's what the judges grade).** One command runs both tests against the frontier (Claude Opus 5.5), Sonnet, Haiku and your own untrained base, on Pop / Grouped / all, and adds measured cost and latency, "worth N real respondents" and a per-dataset win/loss table. How to read it and how to say it in the pitch: [`docs/prove-the-gain.md`](docs/prove-the-gain.md).
+```bash
+../.venv/bin/python eval/prove_gain.py --new <model>:<label> --split dev     # writes results/simbench/prove__<model>__<label>__dev.md
+```
+Commit the `.md` and `.json`, and link the card from your report.
+
 ### 3b. Outside test sets (run your winner on these too)
 These are extra **zero-shot** checks of whether a fine-tune generalizes beyond SimBench's sources. They're **exploratory**: they are not the selection metric and not the headline. **Never train on them.** Each uses the same row format, prompt and grader as SimBench (norms are in `data/simbench_norms.json`).
 
@@ -96,6 +105,7 @@ Copy `experiments/_TEMPLATE.md` to `experiments/<run>.md` and fill in **every** 
 1. At the freeze (**2:30**), collect every `experiments/*.md`.
 2. Rank by **gain over own baseline** on dev Pop *and* by **absolute** dev Pop. The overall winner is the highest absolute dev Pop. Ties go to cheaper and faster.
 3. The winner (plus its untrained base and the frontier model) runs once on `data/test.jsonl`. That's the headline number.
+4. Then `eval/prove_gain.py --new <winner> --split test --own-base <base>:test-base` makes the **test proof card**. Every number in the pitch, README and video comes from that card.
 
 ## 6. House rules
 - No per-person details in committed files: no keys, account names, credit balances, session IDs or personal links. Track your own sessions and deployments in `CLAUDE.local.md` (gitignored) and **delete them when you're done**.
