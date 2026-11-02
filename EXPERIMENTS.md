@@ -56,10 +56,15 @@ Setup (once): see the README "Training setup" line (cookbook + `.venv-train`, Py
 
 Each scoring run writes a per-question file `results/simbench/<model>__<label>__<time>.jsonl` and appends one summary row to `results/simbench/summary.jsonl`. Commit both. (`summary.jsonl` uses git's union merge, so appends from different people don't conflict.)
 
-Compare any two scored runs with the bootstrap ("is it luck?") test:
+Compare any two scored runs with the "is it luck?" tests. Use `--subset pop` for the selection metric:
 ```bash
-.venv/bin/python eval/stats.py --task simbench --base <model>:<label> --new <model>:<label>
+.venv/bin/python eval/stats.py --task simbench --base <model>:<label> --new <model>:<label> --subset pop
 ```
+It prints two tests, and a gain counts as **real only when both agree**:
+- **Bootstrap:** the 95% range of the gap, resampling whole questions. It must not include 0.
+- **"Closer to real people":** the number of questions where each model's answer is nearer the real distribution, with an exact p-value. It must be below 0.05.
+
+It also prints McNemar on "top answer matches" for reference. That one ignores the spread, so it isn't part of the verdict. Other subsets: `--subset grouped`, `--subset all`, `--survey-only`.
 
 ## 4. Write the report (one file per experiment)
 Copy `experiments/_TEMPLATE.md` to `experiments/<run>.md` and fill in **every** field. Every number must be copied from a committed `results/` file, never typed from memory. Report failed and losing runs too: the judges score "meaningful experiments (report the losers too)".
