@@ -1,0 +1,331 @@
+{
+ "label": "v2",
+ "time": "2026-11-02T15:23:51",
+ "grid_step": 0.05,
+ "tie_points": 1.0,
+ "formula": "q = wF*F + wO*O + wM*M + wU*U",
+ "chosen": {
+  "plan": "docs/harness-plan.md",
+  "fit_on": "data/dev.jsonl",
+  "objective": "dev Pop mean",
+  "weights": {
+   "F": 0.5,
+   "O": 0.3,
+   "M": 0.2,
+   "U": 0.0
+  },
+  "F": "ft-nem:nem-800-1e4",
+  "O": "fw-deepseek-v4p1-flash:hx-dev",
+  "o_model_key": "fw-deepseek-v4p1-flash",
+  "trust_threshold": 0.14999999999999997
+ },
+ "dev_chosen": {
+  "pop": 43.14966393766405,
+  "grouped": 59.176341018811144,
+  "all": 51.06619704620382
+ },
+ "singles": {
+  "memory alone": {
+   "pop": 18.244454716525755,
+   "grouped": 27.139526733760984,
+   "all": 22.63826210222047
+  },
+  "F alone": {
+   "pop": 35.19343427367781,
+   "grouped": 59.016452169695285,
+   "all": 46.96104579815356
+  }
+ },
+ "candidates": [
+  {
+   "o": "fw-kimi-k3:hx-dev",
+   "o_model_key": "fw-kimi-k3",
+   "o_failed": 0,
+   "o_alone": {
+    "pop": 21.630795956820243,
+    "grouped": 49.97516477548215,
+    "all": 35.631772769259946
+   },
+   "best_weights": {
+    "F": 0.6,
+    "O": 0.2,
+    "M": 0.2,
+    "U": 0.0
+   },
+   "dev": {
+    "pop": 41.61422509764055,
+    "grouped": 58.76035945141881,
+    "all": 50.08372502004378
+   },
+   "ablations": {
+    "F+U": {
+     "dev_pop": 37.987458455561196,
+     "weights": {
+      "F": 0.85,
+      "U": 0.15
+     }
+    },
+    "O+U": {
+     "dev_pop": 25.807290892441323,
+     "weights": {
+      "O": 0.75,
+      "U": 0.25
+     }
+    },
+    "F+O": {
+     "dev_pop": 38.594635719291645,
+     "weights": {
+      "F": 0.75,
+      "O": 0.25
+     }
+    },
+    "F+O+U": {
+     "dev_pop": 39.622158152188206,
+     "weights": {
+      "F": 0.7,
+      "O": 0.2,
+      "U": 0.1
+     }
+    },
+    "F+M+U": {
+     "dev_pop": 40.274445855479584,
+     "weights": {
+      "F": 0.7,
+      "M": 0.3,
+      "U": 0.0
+     }
+    }
+   },
+   "cost_per_1k_F_plus_O": 1.4457643288590605
+  },
+  {
+   "o": "fw-qwen3p8-max:hx-dev",
+   "o_model_key": "fw-qwen3p8-max",
+   "o_failed": 1,
+   "o_alone": {
+    "pop": 26.33577952588283,
+    "grouped": 48.31404211603861,
+    "all": 37.19215621471145
+   },
+   "best_weights": {
+    "F": 0.55,
+    "O": 0.25,
+    "M": 0.2,
+    "U": 0.0
+   },
+   "dev": {
+    "pop": 42.07270950109455,
+    "grouped": 58.12311057627171,
+    "all": 50.00096130735656
+   },
+   "ablations": {
+    "F+U": {
+     "dev_pop": 37.987458455561196,
+     "weights": {
+      "F": 0.85,
+      "U": 0.15
+     }
+    },
+    "O+U": {
+     "dev_pop": 28.999949460722377,
+     "weights": {
+      "O": 0.8,
+      "U": 0.2
+     }
+    },
+    "F+O": {
+     "dev_pop": 39.260377025697345,
+     "weights": {
+      "F": 0.65,
+      "O": 0.35
+     }
+    },
+    "F+O+U": {
+     "dev_pop": 40.03068075883237,
+     "weights": {
+      "F": 0.65,
+      "O": 0.25,
+      "U": 0.1
+     }
+    },
+    "F+M+U": {
+     "dev_pop": 40.274445855479584,
+     "weights": {
+      "F": 0.7,
+      "M": 0.3,
+      "U": 0.0
+     }
+    }
+   },
+   "cost_per_1k_F_plus_O": 0.8816455369127516
+  },
+  {
+   "o": "fw-deepseek-v4p1-flash:hx-dev",
+   "o_model_key": "fw-deepseek-v4p1-flash",
+   "o_failed": 0,
+   "o_alone": {
+    "pop": 29.580543513765807,
+    "grouped": 50.2610640655475,
+    "all": 39.7958878937063
+   },
+   "best_weights": {
+    "F": 0.5,
+    "O": 0.3,
+    "M": 0.2,
+    "U": 0.0
+   },
+   "dev": {
+    "pop": 43.149663937664045,
+    "grouped": 59.176341018811144,
+    "all": 51.06619704620382
+   },
+   "ablations": {
+    "F+U": {
+     "dev_pop": 37.987458455561196,
+     "weights": {
+      "F": 0.85,
+      "U": 0.15
+     }
+    },
+    "O+U": {
+     "dev_pop": 31.05395164927389,
+     "weights": {
+      "O": 0.85,
+      "U": 0.15
+     }
+    },
+    "F+O": {
+     "dev_pop": 40.940447644105234,
+     "weights": {
+      "F": 0.6,
+      "O": 0.4
+     }
+    },
+    "F+O+U": {
+     "dev_pop": 41.383624574586314,
+     "weights": {
+      "F": 0.6,
+      "O": 0.35,
+      "U": 0.05
+     }
+    },
+    "F+M+U": {
+     "dev_pop": 40.274445855479584,
+     "weights": {
+      "F": 0.7,
+      "M": 0.3,
+      "U": 0.0
+     }
+    }
+   },
+   "cost_per_1k_F_plus_O": 0.28710473154362415
+  }
+ ],
+ "trust": {
+  "threshold": 0.14999999999999997,
+  "threshold_rule": "median of dev disagreement TVD(F, O)",
+  "pop": {
+   "n": 754,
+   "n_flagged": 411,
+   "score_trusted": 53.233854800865466,
+   "score_flagged": 34.73390367956652,
+   "spearman_disagreement_vs_error": 0.29855640415647283
+  },
+  "all": {
+   "n": 1490,
+   "n_flagged": 740,
+   "score_trusted": 57.848204957515506,
+   "score_flagged": 44.19254037933387,
+   "spearman_disagreement_vs_error": 0.27437010212756197
+  },
+  "passes_preregistered_check": true
+ },
+ "opus_honesty_check": {
+  "run": "claude-opus-5-5:dev",
+  "alone": {
+   "pop": 42.53645743528458,
+   "grouped": 64.28378754009404,
+   "all": 53.278762775646825
+  },
+  "best_weights": {
+   "Opus": 0.85,
+   "M": 0.15,
+   "U": 0.0
+  },
+  "dev": {
+   "pop": 43.594081462490195,
+   "grouped": 62.74924551173211,
+   "all": 53.05596115392781
+  }
+ },
+ "anchors": [
+  {
+   "name": "F alone",
+   "weights": {
+    "F": 1.0
+   },
+   "run": "ft-nem:nem-800-1e4",
+   "max_abs_diff": 8.526512829121202e-14
+  },
+  {
+   "name": "O alone",
+   "weights": {
+    "O": 1.0
+   },
+   "run": "fw-kimi-k3:hx-dev",
+   "max_abs_diff": 5.684341886080802e-14
+  },
+  {
+   "name": "O alone",
+   "weights": {
+    "O": 1.0
+   },
+   "run": "fw-qwen3p8-max:hx-dev",
+   "max_abs_diff": 8.526512829121202e-14
+  },
+  {
+   "name": "O alone",
+   "weights": {
+    "O": 1.0
+   },
+   "run": "fw-deepseek-v4p1-flash:hx-dev",
+   "max_abs_diff": 4.263256414560601e-14
+  },
+  {
+   "name": "Opus alone",
+   "weights": {
+    "F": 1.0
+   },
+   "run": "claude-opus-5-5:dev",
+   "max_abs_diff": 4.263256414560601e-14
+  }
+ ],
+ "memory_no_match_dev": 0,
+ "results_file": "results/simbench/crowdcast__dev-v2__152351.jsonl",
+ "provenance": {
+  "data": "data/dev.jsonl",
+  "data_sha256": "a1ba57b8380f0d8bd7b8a0d82af9ee6660d6bad59e5fe11dd667c99d6a0fe3af",
+  "memory_source": "data/train.jsonl",
+  "memory_sha256": "65f6e0fc16b01a363994c8300b2cd94d64e5678c3665d01c1b602c459971a9dc",
+  "weights": {
+   "F": 0.5,
+   "O": 0.3,
+   "M": 0.2,
+   "U": 0.0
+  },
+  "grader": "eval/tasks/simbench.py",
+  "norms_sha256": "fe72b66d2dc21dc289cde7df1753c584c97593d93d0a41ccacf73da71faf7051",
+  "members": {
+   "F": {
+    "spec": "ft-nem:nem-800-1e4",
+    "results_file": "results/simbench/ft-nem__nem-800-1e4__151932.jsonl",
+    "sha256": "45f4fc66c149dc18f3f64a46f1cfc734704b68f0a5bae169841423da2ab2cb16"
+   },
+   "O": {
+    "spec": "fw-deepseek-v4p1-flash:hx-dev",
+    "results_file": "results/simbench/fw-deepseek-v4p1-flash__hx-dev__145401.jsonl",
+    "sha256": "ff8176c0db96b61d5b39c01c4383820eef443411518a9647640028f56a26e482"
+   }
+  }
+ }
+}

@@ -62,3 +62,13 @@ The fine-tune alone does not beat Opus. The brief allows "a smarter harness, or 
 - Retrieval inside the prompt: needs a new prompt for every system.
 - Reading letter probabilities: SimBench says written percentages beat them for instruction-tuned models.
 - Chain of thought: SimBench reports no gain.
+
+## v2 rule (written 15:23, before any v2 score exists)
+- **v2 = the same harness, with F = `ft-nem:nem-800-1e4`** (Nemotron 3.5 Super fine-tune).
+- **Fit on dev only,** with the same grid, objective (dev Pop), O candidates and tie rule as v1.
+- **Go to test only if** v2's fitted dev Pop is ≥ 3 points above v1's (41.12), **and** the Nemotron test scoring is done by 15:45. Otherwise v1 stands.
+- **Weights and O are frozen in `results/simbench/crowdcast_fit__v2.json` before any v2 test run.**
+- **v1's test card is reported next to v2's either way.** v1 has already seen test, so a v2 test result is a second look.
+- **Outcome (15:24):** v2 dev Pop 43.15 vs v1 41.12 = +2.03 < 3, so **v2 is not run on test; v1 stands.**
+  - v2 dev Grouped 59.18 (v1 54.42), all 51.07 (v1 47.69), weights F 0.50 / O 0.30 / M 0.20.
+  - Files: `results/simbench/crowdcast_fit__v2.json`, `crowdcast__dev-v2__152351.jsonl`.
