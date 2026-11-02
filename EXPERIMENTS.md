@@ -10,6 +10,8 @@ Add a row **before** you launch, then commit and push. The same base model is fi
 | Person | Run name (≤17 chars) | Base model | Training data | LR / epochs / batch / LoRA rank / other | Status |
 |---|---|---|---|---|---|
 | Dylan | `q36-3k-1e4` | Qwen 3.6 35B A3B | `train_sft_3k.jsonl` (mixed 3k) | 1e-4 / 1 / 16 / 16 | trained 13:46, not scored yet |
+| Dylan | `q36-poph-1e4` | Qwen 3.6 35B A3B | `train_sft_poph3k.jsonl` (Pop + Grouped capped 10/question) | 1e-4 / 1 / 16 / 16 | launching 14:08 |
+| Dylan | `q36-pop-1e4` | Qwen 3.6 35B A3B | `train_sft_pop3k.jsonl` (Pop only 3k) | 1e-4 / 1 / 16 / 16 | launching 14:08 |
 
 **Base models available for serverless training** (IDs are verified, or come from `docs/fireworks-reference.md` §3):
 | Base | Fireworks ID | Key in `train/common.py` |
