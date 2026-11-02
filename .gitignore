@@ -12,3 +12,5 @@ results/*.csv
 .DS_Store
 cookbook/
 .venv-train/
+runs/
+CLAUDE.local.md

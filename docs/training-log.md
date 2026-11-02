@@ -12,7 +12,7 @@ Running log of every training run: setup, what's running, what each one cost, an
 This rule is written down before any results exist, so the judges can see we didn't pick the winner by peeking at the test set.
 
 ## Budget
-- Fireworks credit: **$50** (Dylan's account).
+- Fireworks credit: **$50 per person**. Each teammate trains and scores on their own account; whoever launches a run tracks its session in their own `CLAUDE.local.md`.
 - **Training cap: ~$30.** The remaining ~$20 is reserved for scoring every run on dev, scoring the winner and base on test, and the demo deployment ($8/hour, delete right after).
 - Per-run cost **(estimate, not measured)**: the 3k file is 3.44 MB ≈ 0.86M tokens per epoch → ~$1.85 on Qwen 3.6 35B ($2.14/1M train), ~$2.00 on Nemotron ($2.32/1M). The full 6.7k file is 7.69 MB ≈ 1.9M tokens → ~$4.10 / ~$4.50. Prefill and sampling for eval come on top of this. Actual cost goes in the run table once it's known.
 
@@ -50,8 +50,8 @@ Estimated training total for this grid: ~$16 (estimate). This may change after t
 ## Runs
 | Name | Started | Status | Steps | Training session / checkpoint | Cost (actual) | Dev score | Results file |
 |---|---|---|---|---|---|---|---|
-| `smoke-q36` | 13:31 | tiny test (48 rows), 6/6 steps done | 6 | `ts-780a0c9237e744f3a5601c74df6b41cf` | ~$0.03 (est.) | n/a | — |
-| `q36-3k-1e4` | 13:31 | **done 13:46** (15 min) | 188/188; final loss ~0.30 | `ts-2106021a6c614885b8a06b88a71e671d`, run `run-d0c2c9a298044e599b2a4bdb0568c12f`; checkpoints step-62/124/186/188 | ~$1.85 (est.) | not scored yet | |
+| `smoke-q36` | 13:31 | tiny test (48 rows), 6/6 steps done | 6 | (runner's account) | ~$0.03 (est.) | n/a | — |
+| `q36-3k-1e4` | 13:31 | **done 13:46** (15 min) | 188/188; final loss ~0.30 | checkpoints step-62/124/186/188 | ~$1.85 (est.) | not scored yet | |
 
 ## Timeline
 - **13:23** Fireworks key added to `.env`. Inference call works (HTTP 200).
@@ -65,13 +65,13 @@ Estimated training total for this grid: ~$16 (estimate). This may change after t
 - **13:32** Tried to launch the other 5 runs; a shell bug meant none started. Paused to confirm with the user.
 - **13:33** `smoke-q36` finished: 6/6 steps, scoreable checkpoints `step-3` and `step-6` saved. Training and saving both work.
 - **13:34** **User: hold the other 5 runs until the plan is approved.** Only `q36-3k-1e4` keeps running.
-- **13:46** `q36-3k-1e4` finished: 188 steps in 15 min, with scoreable checkpoints at steps 62, 124, 186 and 188. Server names look like `run-d0c2c9a298044e599b2a4bdb0568c12f-step-188-0b91e9e3`.
+- **13:46** `q36-3k-1e4` finished: 188 steps in 15 min, with scoreable checkpoints at steps 62, 124, 186 and 188. Server names look like `run-<id>-step-188-<hash>`.
 - **13:46** Planner session (fireworks-hackathon-46) built `data/train_sft_pop3k.jsonl` (3,000 Pop rows) and `data/train_sft_poph3k.jsonl` (2,530 Pop + 470 Grouped, capped at 10 personas/question) with `eval/make_mixes.py` (seed 42, asserts no overlap with dev/test).
 
 - **13:55** Moved to the team repo (`anooj-shah/fireworks-hackathon`). Official split = ours (see `docs/decisions.md`). Winner-selection metric = dev Pop mean.
 
 ## Open issues
 - **Frontier baseline not run yet.** The team is using Fireworks only for now, but the rules require a closed-model baseline (GPT, Claude or Gemini). It needs a key before the 2:30 freeze.
-- Active cloud resources: training sessions `ts-780a0c9237e744f3a5601c74df6b41cf` (smoke-q36, finished, delete after using its checkpoint to verify fine-tuned scoring) and `ts-2106021a6c614885b8a06b88a71e671d` (q36-3k-1e4, running). No deployments. Everything gets listed here and in `CLAUDE.md` Live status so it gets deleted.
+- Active cloud resources are per person: each runner lists their own sessions/deployments in `CLAUDE.local.md` and deletes them after use.
 - **Data shape (verified 13:38):** Grouped = 47 train questions × ~66 personas each (3,091 rows); Pop = 2,679 questions × 1.3 rows (3,613). **Test is 47% Grouped** (2,516 rows, only 41 questions) and dev Grouped has only **12 questions**, so dev comparisons on the Grouped half are noisy. Compare Pop and Grouped separately on dev.
 - Run 1 slowed from ~10 to ~4 steps/min at 13:38 (shared pool?), so it now finishes ~14:15, not 13:45.

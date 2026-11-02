@@ -86,18 +86,14 @@ Commands:
 - Each test row carries an `id` and a **`group`** (the unit for the cluster bootstrap).
 - Log every material choice in `docs/decisions.md` (time, decision, why, alternatives rejected).
 - Log AI-assistant use and pre-existing code in the disclosure section of `docs/rules-and-submission.md`.
-- Don't create deployments or training sessions without noting them in **Live status**, so they get deleted. Keep an eye on spend against credits.
+- **Per-person state stays out of the repo.** Each teammate has their own Fireworks account, credits, keys, running training sessions, deployments and pending approvals. Track yours in `CLAUDE.local.md` at the repo root (gitignored, auto-loaded by Claude Code), never in committed files. Note every session/deployment you create there so it gets deleted.
 - Your knowledge cutoff predates this event. **Verify Fireworks facts** against `docs/fireworks-reference.md` or docs.fireworks.ai (`https://docs.fireworks.ai/llms.txt`), not memory.
 - Secrets live only in `.env` (see `.env.example`). The repo is going public.
 
-## Live status (update me)
-- **Time of last update:** 13:33
+## Shared status (update me; team-wide facts only, nothing account-specific)
 - **Task: LOCKED 12:28 = SimBench "synthetic focus group"**. **Full brief: `docs/project-brief.md` (read it first).** Given a group description + multiple-choice question, predict the % of the group choosing each option. Pitch: market researchers / product teams; demo hook = Oct-2026 CA ballot polls by age (post-cutoff).
-- **Data:** `data/test.jsonl` **LOCKED** (5,316 rows, 2,116 question clusters, sha256 in `data/split_manifest.json`); `data/dev.jsonl` (1,490 rows, 542 questions; iterate here); `data/train.jsonl` + `data/train_sft.jsonl` (6,704 rows, ~1.7M tokens). Built by `eval/prep_simbench.py`. Raw in `data/raw/simbench/` (gitignored). OPeRA raw also downloaded (`data/raw/opera/`, unused).
+- **Data:** `data/test.jsonl` **LOCKED** (5,316 rows, 2,116 question clusters, sha256 in `data/split_manifest.json`); `data/dev.jsonl` (1,490 rows, 542 questions; iterate here); `data/train.jsonl` + `data/train_sft.jsonl` (6,704 rows). Mixes: `data/train_sft_3k.jsonl`, `train_sft_pop3k.jsonl`, `train_sft_poph3k.jsonl` (`eval/make_mixes.py`). Built by `eval/prep_simbench.py` from `data/raw/simbench/` (gitignored). `scripts/make_splits.py` (Grouped-only) is superseded, see README.
 - **Eval:** `eval/tasks/simbench.py` = official SimBench prompt + metric (score = S/100, units = top-answer match for McNemar). No-AI analysis on dev (`results/simbench/offline_dev_analysis.json`): uniform ~0, dataset average 17.9, 10-nearest-questions 22.7; true answer sharpened^2 56.8, one-hot -30.6 (overconfidence is costly).
-- **Team:** not formed on HackerSquad yet (needs 2–5 people, all present)
-- **Credits/keys:** $50 Fireworks credit on Dylan's account. `FIREWORKS_API_KEY` is in `.env` and works (13:23). Team is Fireworks-only for now; **a closed-model key is still needed for the required frontier baseline**
-- **Plan:** `docs/plan.md` (3 engineers: E1 baseline/eval, E2 fine-tune, E3 harness; gates at 1:05 / 1:30 / 2:15; freeze 2:30)
-- **Training:** cookbook approved and cloned into `./cookbook` (gitignored), venv `.venv-train` (Py 3.12). Plan: 5–6 serverless LoRA variants (Qwen 3.6 35B + Nemotron 3.5 Super), ~$30 cap, winner picked on dev only. **Full log + run table: `docs/training-log.md`**
-- **Pending user approvals:** firectl, yt-dlp
-- **Active cloud resources:** serverless training sessions `ts-780a0c9237e744f3a5601c74df6b41cf` (smoke-q36, tiny test) and `ts-2106021a6c614885b8a06b88a71e671d` (q36-3k-1e4). No deployments. Delete sessions after the winner is promoted. Details: `docs/training-log.md`
+- **Plan:** `docs/plan.md` (pre-registered: winner = best dev Pop score; headline = Pop-half gap over the frontier on test).
+- **Training:** serverless LoRA via `train/train_sft.py` (setup in README; `cookbook/` and `.venv-train/` are local, gitignored). Run table + selection rule: `docs/training-log.md`. Per-run logs land in `runs/` (local, gitignored).
+- **Open:** a closed-model key for the required frontier baseline.
