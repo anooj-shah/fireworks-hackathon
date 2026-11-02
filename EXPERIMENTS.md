@@ -12,6 +12,8 @@ Add a row **before** you launch, then commit and push. The same base model is fi
 | Dylan | `q36-3k-1e4` | Qwen 3.6 35B A3B | `train_sft_3k.jsonl` (mixed 3k) | 1e-4 / 1 / 16 / 16 | scored 14:18: dev Pop 30.4 (base 10.1), report `experiments/q36-3k-1e4.md` |
 | Dylan | `q36-poph-1e4` | Qwen 3.6 35B A3B | `train_sft_poph3k.jsonl` (Pop + Grouped capped 10/question) | 1e-4 / 1 / 16 / 16 | training (launched 14:08, ETA ~14:35) |
 | Dylan | `q36-pop-1e4` | Qwen 3.6 35B A3B | `train_sft_pop3k.jsonl` (Pop only 3k) | 1e-4 / 1 / 16 / 16 | training (launched 14:08, ETA ~14:35) |
+| Dylan | `nem-3k-1e4` | NVIDIA Nemotron 3.5 Super VL 120B | `train_sft_3k.jsonl` (mixed 3k) | 1e-4 / 1 / 16 / 16 | launching 14:41 (after the 2:30 freeze; user-approved, disclosed; final if scored by 15:15) |
+| Dylan | `q36-3k-3e4` | Qwen 3.6 35B A3B | `train_sft_3k.jsonl` (mixed 3k) | 3e-4 / 1 / 16 / 16 | launching 14:41 (after the 2:30 freeze; user-approved, disclosed; final if scored by 15:15) |
 
 **Base models available for serverless training** (IDs are verified, or come from `docs/fireworks-reference.md` §3):
 | Base | Fireworks ID | Key in `train/common.py` |
