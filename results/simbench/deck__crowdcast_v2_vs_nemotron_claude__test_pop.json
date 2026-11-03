@@ -17,7 +17,13 @@
       "us_closer": 973,
       "them_closer": 1138,
       "p": 0.0003554918510223497,
-      "verdict": "can't tell apart"
+      "verdict": "can't tell apart",
+      "mcnemar_top1": {
+        "only_new": 359,
+        "only_base": 298,
+        "units": 2800,
+        "p": 0.019172669312795734
+      }
     },
     {
       "vs": "Claude Sonnet 5.5",
@@ -32,7 +38,13 @@
       "us_closer": 1123,
       "them_closer": 988,
       "p": 0.0035301185091737384,
-      "verdict": "real gain"
+      "verdict": "real gain",
+      "mcnemar_top1": {
+        "only_new": 400,
+        "only_base": 198,
+        "units": 2800,
+        "p": 1.0496143741079233e-16
+      }
     },
     {
       "vs": "Claude Haiku 5.5",
@@ -47,7 +59,13 @@
       "us_closer": 1353,
       "them_closer": 758,
       "p": 9.971394495833168e-39,
-      "verdict": "real gain"
+      "verdict": "real gain",
+      "mcnemar_top1": {
+        "only_new": 470,
+        "only_base": 206,
+        "units": 2800,
+        "p": 1.1933595161041419e-24
+      }
     },
     {
       "vs": "Nemotron 3.5 Super, fine-tuned",
@@ -62,7 +80,13 @@
       "us_closer": 1298,
       "them_closer": 813,
       "p": 3.6578004111175914e-26,
-      "verdict": "real gain"
+      "verdict": "real gain",
+      "mcnemar_top1": {
+        "only_new": 158,
+        "only_base": 104,
+        "units": 2800,
+        "p": 0.001021176224382051
+      }
     },
     {
       "vs": "Nemotron 3.5 Super, untrained",
@@ -77,7 +101,13 @@
       "us_closer": 1327,
       "them_closer": 784,
       "p": 1.8542565388477776e-32,
-      "verdict": "real gain"
+      "verdict": "real gain",
+      "mcnemar_top1": {
+        "only_new": 517,
+        "only_base": 182,
+        "units": 2800,
+        "p": 4.855305362047706e-38
+      }
     }
   ],
   "nemotron_ft_vs_untrained": {
@@ -93,6 +123,12 @@
     "us_closer": 1092,
     "them_closer": 773,
     "p": 1.5680398345373484e-13,
-    "verdict": "real gain"
+    "verdict": "real gain",
+    "mcnemar_top1": {
+      "only_new": 512,
+      "only_base": 231,
+      "units": 2800,
+      "p": 2.498696238883437e-25
+    }
   }
 }
